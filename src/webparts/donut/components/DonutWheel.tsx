@@ -25,6 +25,7 @@ import {
   populateMonthsArrUpper,
   populateWeeksLower,
   populateWeeksUpper,
+  dateWithoutTime,
 } from './DonutHandler';
 
 import { Arc, IListObj } from './interfaces/IDonut';
@@ -96,25 +97,24 @@ const DonutWheel = ({ props }): JSX.Element => {
     ];
 
     if (items.length >= 1) {
-      const mapped = items.map((item) => {
-        console.log(item);
+      const mappedItems = items.map((item) => {
         return {
           id: item.Id,
           title: item.Title,
-          startDate: item.StartDateAndTime,
-          endDate: item.EndDateAndTime,
+          startDate: dateWithoutTime(item.StartDateAndTime),
+          endDate: dateWithoutTime(item.EndDateAndTime),
           description: item.Description,
           duration: item.Duration,
           location: item.Location,
-          category: item?.SessionType,
-          startDay: getDayOfYear(new Date(item?.StartDateAndTime)),
-          endDay: getDayOfYear(new Date(item?.EndDateAndTime)),
+          category: item.Titel,
+          startDay: getDayOfYear(new Date(item.StartDateAndTime)),
+          endDay: getDayOfYear(new Date(item.EndDateAndTime)),
         };
       });
 
-      console.log(props.collectionData);
+      console.log(mappedItems);
+
       props.collectionData.forEach((data, index) => {
-        console.log(data);
         if (index == 0) {
           wheelData.push({
             innerRadius: 405,
@@ -180,15 +180,14 @@ const DonutWheel = ({ props }): JSX.Element => {
           .attr('transform', 'translate(500,500)')
       );
 
-      let mappedArcs = mapped.map((item) => {
-        console.log('wheeldata', wheelData);
+      let mappedArcs = mappedItems.map((item) => {
         console.log('item', item);
+        console.log('WheelData', wheelData);
         const arc = d3.arc();
         const start = getDegreeFromDay(item.startDay) * (Math.PI / 180);
         const end = getDegreeFromDay(item.endDay) * (Math.PI / 180);
 
-        let wheel = wheelData.find((c) => c?.category == item?.category);
-        console.log(wheel);
+        let wheel = wheelData.find((c) => c?.category == item?.title);
 
         return {
           arcSvg: arc({
@@ -203,14 +202,15 @@ const DonutWheel = ({ props }): JSX.Element => {
             start,
             end
           ),
-          color: 'blue',
+          color: 'pink',
           title: item.title,
           id: item.id,
         };
       });
 
       mappedArcs.forEach((event) => {
-        let data = mapped.find((d) => d.id == event.id);
+        let data = mappedItems.find((d) => d.id == event.id);
+        console.log(event);
 
         svgEl
           .append('g')
@@ -218,7 +218,14 @@ const DonutWheel = ({ props }): JSX.Element => {
           .attr('d', event.arcSvg)
           .style('fill', event.color)
           .attr('transform', 'translate(500,500)')
-          .selectAll('g')
+          .on('mouseenter', (e) => {
+            setTextValue(event.title);
+            setDateValue(data.startDate + ' - ' + data.endDate);
+            setShowDiv(true);
+          })
+          .on('mouseleave', (e) => {
+            setShowDiv(false);
+          })
           .on('click', (e) => {
             setDataObj({
               ...dataObj,
@@ -229,19 +236,11 @@ const DonutWheel = ({ props }): JSX.Element => {
               location: data.location,
             });
             setIsModalOpen(true);
-          })
-          .on('mouseenter', (e) => {
-            setTextValue(event.title);
-            setDateValue(data.startDate + ' - ' + data.endDate);
-            setShowDiv(true);
-          })
-          .on('mouseleave', (e) => {
-            setShowDiv(false);
-          })
-          .style('cursor', 'pointer');
+          });
 
         svgEl
           .selectAll('g')
+          .style('cursor', 'pointer')
           .append('text')
           .attr('font-size', '13px')
           .attr('font-family', 'sans-serif')
@@ -269,8 +268,7 @@ const DonutWheel = ({ props }): JSX.Element => {
           })
           .on('mouseleave', (e) => {
             setShowDiv(false);
-          })
-          .style('cursor', 'pointer');
+          });
       });
     }
 

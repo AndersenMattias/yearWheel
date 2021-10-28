@@ -17,8 +17,7 @@ import {
   IconButton,
   IButtonStyles,
 } from '@fluentui/react/lib/Button';
-import { useEffect, useState } from 'react';
-import { sp } from '@pnp/sp';
+
 import { IDonutModalProps } from './interfaces/IDonut';
 
 export const DonutModal = ({
@@ -40,6 +39,7 @@ export const DonutModal = ({
     }),
     [keepInBounds]
   );
+  console.log('data modal', data);
 
   // Use useId() to ensure that the IDs are unique on the page.
   // (It's also okay to use plain strings and manually ensure uniqueness.)
