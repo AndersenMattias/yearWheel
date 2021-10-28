@@ -17,6 +17,7 @@ export const getDayOfYear = (date) => {
 
 export const dateWithoutTime = (date) => {
   let today = new Date(date).toISOString().slice(0, 10);
+
   return today;
 };
 

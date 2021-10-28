@@ -42,6 +42,7 @@ const DonutWheel = ({ props }): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showDiv, setShowDiv] = useState<boolean>(false);
   const [items, setItems] = useState<any>([]);
+  const [eventList, setEventList] = useState<any>([]);
   const [textValue, setTextValue] = useState<string>('');
   const [dateValue, setDateValue] = useState<string>('');
   const [dataObj, setDataObj] = useState<IListObj>({});
@@ -66,7 +67,7 @@ const DonutWheel = ({ props }): JSX.Element => {
   useEffect(() => {
     const fetchList = async () => {
       const items: any[] = await sp.web.lists
-        .getByTitle('Evenemangsplan')
+        .getByTitle('EventPlanner')
         .items.get();
       setItems(items);
     };
@@ -75,10 +76,11 @@ const DonutWheel = ({ props }): JSX.Element => {
   }, []);
 
   useEffect(() => {
+    console.log(eventList);
     let wheelData: Arc[] = [
       {
-        innerRadius: 499,
-        outerRadius: 500,
+        innerRadius: 350,
+        outerRadius: 349,
         startAngle: 0 * (Math.PI / 180),
         endAngle: 360 * (Math.PI / 180),
         color: '#000',
@@ -98,23 +100,23 @@ const DonutWheel = ({ props }): JSX.Element => {
 
     if (items.length >= 1) {
       const mappedItems = items.map((item) => {
+        console.log(items);
         return {
           id: item.Id,
           title: item.Title,
-          startDate: dateWithoutTime(item.StartDateAndTime),
-          endDate: dateWithoutTime(item.EndDateAndTime),
+          startDate: dateWithoutTime(item.StartDate),
+          endDate: dateWithoutTime(item.DueDate),
           description: item.Description,
           duration: item.Duration,
           location: item.Location,
-          category: item.Titel,
-          startDay: getDayOfYear(new Date(item.StartDateAndTime)),
-          endDay: getDayOfYear(new Date(item.EndDateAndTime)),
+          category: item.Category,
+          startDay: getDayOfYear(new Date(item.StartDate)),
+          endDay: getDayOfYear(new Date(item.DueDate)),
         };
       });
 
-      console.log(mappedItems);
-
       props.collectionData.forEach((data, index) => {
+        console.log('data', data);
         if (index == 0) {
           wheelData.push({
             innerRadius: 405,
@@ -123,7 +125,7 @@ const DonutWheel = ({ props }): JSX.Element => {
             endAngle: getDegreeFromDay(360) * (Math.PI / 180),
             color: data.Colour,
             arcSvg: undefined,
-            category: data.Category,
+            category: data.pickCategory,
           });
         } else if (index == 1) {
           wheelData.push({
@@ -133,7 +135,7 @@ const DonutWheel = ({ props }): JSX.Element => {
             endAngle: getDegreeFromDay(360) * (Math.PI / 180),
             color: data.Colour,
             arcSvg: undefined,
-            category: data.Category,
+            category: data.pickCategory,
           });
         } else if (index == 2) {
           wheelData.push({
@@ -143,7 +145,7 @@ const DonutWheel = ({ props }): JSX.Element => {
             endAngle: getDegreeFromDay(360) * (Math.PI / 180),
             color: data.Colour,
             arcSvg: undefined,
-            category: data.Category,
+            category: data.pickCategory,
           });
         } else if (index == 3) {
           wheelData.push({
@@ -153,7 +155,7 @@ const DonutWheel = ({ props }): JSX.Element => {
             endAngle: getDegreeFromDay(360) * (Math.PI / 180),
             color: data.Colour,
             arcSvg: undefined,
-            category: data.Category,
+            category: data.pickCategory,
           });
         }
       });
@@ -182,12 +184,11 @@ const DonutWheel = ({ props }): JSX.Element => {
 
       let mappedArcs = mappedItems.map((item) => {
         console.log('item', item);
-        console.log('WheelData', wheelData);
         const arc = d3.arc();
         const start = getDegreeFromDay(item.startDay) * (Math.PI / 180);
         const end = getDegreeFromDay(item.endDay) * (Math.PI / 180);
 
-        let wheel = wheelData.find((c) => c?.category == item?.title);
+        let wheel = wheelData.find((c) => c.category == item.category);
 
         return {
           arcSvg: arc({
@@ -210,7 +211,6 @@ const DonutWheel = ({ props }): JSX.Element => {
 
       mappedArcs.forEach((event) => {
         let data = mappedItems.find((d) => d.id == event.id);
-        console.log(event);
 
         svgEl
           .append('g')
@@ -390,7 +390,7 @@ const DonutWheel = ({ props }): JSX.Element => {
   };
 
   return (
-    <>
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
       {showDiv && <DivHover />}
       {isModalOpen && (
         <DonutModal
@@ -400,8 +400,8 @@ const DonutWheel = ({ props }): JSX.Element => {
           data={dataObj}
         />
       )}
-      <svg viewBox='0 0 1000 1000' ref={ref}></svg>
-    </>
+      <svg viewBox='0 0 1000 1000' height='850' width='850' ref={ref}></svg>
+    </div>
   );
 };
 
