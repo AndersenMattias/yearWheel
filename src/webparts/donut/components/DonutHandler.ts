@@ -1,5 +1,4 @@
 import * as d3 from 'd3';
-import { wheelData } from './DonutWheelData';
 
 export const getDegreeFromDay = (dayOfYear) => (365 / 360) * dayOfYear;
 
@@ -16,9 +15,9 @@ export const getDayOfYear = (date) => {
 };
 
 export const dateWithoutTime = (date) => {
-  let today = new Date(date).toISOString().slice(0, 10);
+  let newDate = new Date(date).toISOString().slice(0, 10);
 
-  return today;
+  return newDate;
 };
 
 // Calculate cartesian points in circle
@@ -42,6 +41,7 @@ export const calcAngleDegrees = (fromX, fromY, toX, toY, force360 = true) => {
   return degrees;
 };
 
+// calculates center of "box", text in center etc
 export const getCentroid = (innerRadius, outerRadius, startAngle, endAngle) => {
   const r = (+innerRadius + +outerRadius) / 2;
   const a = (+startAngle + +endAngle) / 2 - Math.PI / 2;
@@ -49,24 +49,25 @@ export const getCentroid = (innerRadius, outerRadius, startAngle, endAngle) => {
   return [Math.cos(a) * r, Math.sin(a) * r];
 };
 
-export const drawArc = (
-  innerRadius: number,
-  outerradius: number,
-  item,
-  title: string,
-  colour: string
+// add data to wheelData array
+export const addWheeldata = (
+  arr,
+  innerradius: number,
+  outerRadius: number,
+  colour: any,
+  category: any,
+  evColour: any
 ) => {
-  const arc = d3.arc();
-  return {
-    arcSvg: arc({
-      innerRadius: innerRadius,
-      outerRadius: outerradius,
-      startAngle: getDegreeFromDay(item.startDay) * (Math.PI / 180),
-      endAngle: getDegreeFromDay(item.endDay) * (Math.PI / 180),
-    }),
-    color: colour,
-    title: title,
-  };
+  return arr.push({
+    innerRadius: innerradius,
+    outerRadius: outerRadius,
+    startAngle: getDegreeFromDay(0) * (Math.PI / 180),
+    endAngle: getDegreeFromDay(360) * (Math.PI / 180),
+    colour: colour.Colour,
+    arcSvg: undefined,
+    category: category.pickCategory,
+    eventColour: evColour.eventColour,
+  });
 };
 
 export const drawText = (arr: any[], rotate: number, svgEl) => {
@@ -86,18 +87,6 @@ export const drawText = (arr: any[], rotate: number, svgEl) => {
           coord.coords.x
         }, ${coord.coords.y})`
       );
-  });
-};
-
-export const addWheeldata = (innerradius, outerRadius, colour, category) => {
-  wheelData.push({
-    innerRadius: innerradius,
-    outerRadius: outerRadius,
-    startAngle: getDegreeFromDay(0) * (Math.PI / 180),
-    endAngle: getDegreeFromDay(360) * (Math.PI / 180),
-    color: colour.Colour,
-    arcSvg: undefined,
-    category: category.Category,
   });
 };
 

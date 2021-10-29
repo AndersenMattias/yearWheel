@@ -34,11 +34,11 @@ export interface IDonutWebPartProps {
   fourthCircleTitle: string;
   categoryOption: string;
   collectionData: any;
-  color: string;
+  colour: string;
 }
 
 export interface IPropertyControlsTestWebPartProps {
-  color: string;
+  colour: string;
 }
 
 export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartProps> {
@@ -47,7 +47,7 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
       Donut,
       {
         description: this.properties.description,
-        color: this.properties.color,
+        colour: this.properties.colour,
         collectionData: this.properties.collectionData,
       }
     );
@@ -83,12 +83,11 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
                   fields: [
                     {
                       id: 'categoryName',
-                      title:
-                        'Kategori namn, första fältet är för generella cirkeln',
+                      title: 'Kategori namn',
                       type: CustomCollectionFieldType.string,
                     },
                     {
-                      id: 'pickCategory',
+                      id: 'choosenCategory',
                       title: 'Välj kategori',
                       type: CustomCollectionFieldType.dropdown,
                       options: [
@@ -113,6 +112,11 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
                     {
                       id: 'Colour',
                       title: 'Färg',
+                      type: CustomCollectionFieldType.string,
+                    },
+                    {
+                      id: 'eventColour',
+                      title: 'Välj färg för inlagda event',
                       type: CustomCollectionFieldType.string,
                     },
                   ],

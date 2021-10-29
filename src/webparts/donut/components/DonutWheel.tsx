@@ -11,6 +11,7 @@ import {
   monthsLabelLower,
   strokeArr,
   wheelData,
+  wheelEventData,
 } from './DonutWheelData';
 
 import {
@@ -28,21 +29,19 @@ import {
   dateWithoutTime,
 } from './DonutHandler';
 
-import { Arc, IListObj } from './interfaces/IDonut';
+import { Arc, IDonutWheelProps, IListObj } from './interfaces/IDonut';
 
 import { DonutModal } from './DonutModal';
-import { addDays } from '@fluentui/react';
 
 import { sp } from '@pnp/sp';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
 
-const DonutWheel = ({ props }): JSX.Element => {
+const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showDiv, setShowDiv] = useState<boolean>(false);
   const [items, setItems] = useState<any>([]);
-  const [eventList, setEventList] = useState<any>([]);
   const [textValue, setTextValue] = useState<string>('');
   const [dateValue, setDateValue] = useState<string>('');
   const [dataObj, setDataObj] = useState<IListObj>({});
@@ -76,87 +75,31 @@ const DonutWheel = ({ props }): JSX.Element => {
   }, []);
 
   useEffect(() => {
-    console.log(eventList);
-    let wheelData: Arc[] = [
-      {
-        innerRadius: 350,
-        outerRadius: 349,
-        startAngle: 0 * (Math.PI / 180),
-        endAngle: 360 * (Math.PI / 180),
-        color: '#000',
-        arcSvg: undefined,
-        category: '',
-      },
-      {
-        innerRadius: 485,
-        outerRadius: 486,
-        startAngle: getDegreeFromDay(0) * (Math.PI / 180),
-        endAngle: getDegreeFromDay(360) * (Math.PI / 180),
-        color: '#000',
-        arcSvg: undefined,
-        category: '',
-      },
-    ];
-
     if (items.length >= 1) {
       const mappedItems = items.map((item) => {
-        console.log(items);
         return {
           id: item.Id,
           title: item.Title,
           startDate: dateWithoutTime(item.StartDate),
           endDate: dateWithoutTime(item.DueDate),
           description: item.Description,
-          duration: item.Duration,
-          location: item.Location,
           category: item.Category,
           startDay: getDayOfYear(new Date(item.StartDate)),
           endDay: getDayOfYear(new Date(item.DueDate)),
         };
       });
 
-      props.collectionData.forEach((data, index) => {
-        console.log('data', data);
+      // loop over data from input in "collectionpanel"
+      // create one circle for each category
+      collectionData.forEach((data, index) => {
         if (index == 0) {
-          wheelData.push({
-            innerRadius: 405,
-            outerRadius: 470,
-            startAngle: getDegreeFromDay(0) * (Math.PI / 180),
-            endAngle: getDegreeFromDay(360) * (Math.PI / 180),
-            color: data.Colour,
-            arcSvg: undefined,
-            category: data.pickCategory,
-          });
+          addWheeldata(wheelData, 405, 470, data, data, data);
         } else if (index == 1) {
-          wheelData.push({
-            innerRadius: 390,
-            outerRadius: 317,
-            startAngle: getDegreeFromDay(0) * (Math.PI / 180),
-            endAngle: getDegreeFromDay(360) * (Math.PI / 180),
-            color: data.Colour,
-            arcSvg: undefined,
-            category: data.pickCategory,
-          });
+          addWheeldata(wheelData, 390, 317, data, data, data);
         } else if (index == 2) {
-          wheelData.push({
-            innerRadius: 300,
-            outerRadius: 240,
-            startAngle: getDegreeFromDay(0) * (Math.PI / 180),
-            endAngle: getDegreeFromDay(360) * (Math.PI / 180),
-            color: data.Colour,
-            arcSvg: undefined,
-            category: data.pickCategory,
-          });
+          addWheeldata(wheelData, 300, 240, data, data, data);
         } else if (index == 3) {
-          wheelData.push({
-            innerRadius: 224,
-            outerRadius: 154,
-            startAngle: getDegreeFromDay(0) * (Math.PI / 180),
-            endAngle: getDegreeFromDay(360) * (Math.PI / 180),
-            color: data.Colour,
-            arcSvg: undefined,
-            category: data.pickCategory,
-          });
+          addWheeldata(wheelData, 224, 154, data, data, data);
         }
       });
 
@@ -169,7 +112,7 @@ const DonutWheel = ({ props }): JSX.Element => {
             startAngle: base.startAngle,
             endAngle: base.endAngle,
           }),
-          color: base.color,
+          colour: base.colour,
           category: base.category,
         };
       });
@@ -178,17 +121,16 @@ const DonutWheel = ({ props }): JSX.Element => {
         svgEl
           .append('path')
           .attr('d', base.arcSvg)
-          .style('fill', base.color)
+          .style('fill', base.colour)
           .attr('transform', 'translate(500,500)')
       );
 
       let mappedArcs = mappedItems.map((item) => {
-        console.log('item', item);
+        let wheel = wheelData.find((c) => c.category == item.category);
+
         const arc = d3.arc();
         const start = getDegreeFromDay(item.startDay) * (Math.PI / 180);
         const end = getDegreeFromDay(item.endDay) * (Math.PI / 180);
-
-        let wheel = wheelData.find((c) => c.category == item.category);
 
         return {
           arcSvg: arc({
@@ -203,7 +145,8 @@ const DonutWheel = ({ props }): JSX.Element => {
             start,
             end
           ),
-          color: 'pink',
+          // TODO: Fixa färg för event, lägger till men endast efter rerender?
+          colour: wheel.eventColour,
           title: item.title,
           id: item.id,
         };
@@ -216,8 +159,9 @@ const DonutWheel = ({ props }): JSX.Element => {
           .append('g')
           .append('path')
           .attr('d', event.arcSvg)
-          .style('fill', event.color)
           .attr('transform', 'translate(500,500)')
+          .style('fill', event.colour)
+
           .on('mouseenter', (e) => {
             setTextValue(event.title);
             setDateValue(data.startDate + ' - ' + data.endDate);
@@ -238,18 +182,38 @@ const DonutWheel = ({ props }): JSX.Element => {
             setIsModalOpen(true);
           });
 
+        // svgEl
+        //   .append('g')
+        //   .append('text')
+        // .attr('x', event.centroid[0])
+        // .attr('y', event.centroid[1])
+        //   .attr('transform', 'translate(500,500)')
+
+        //   .text('We go up, then we go down, then up again.')
+
+        svgEl.selectAll('g').style('cursor', 'pointer');
+
         svgEl
-          .selectAll('g')
-          .style('cursor', 'pointer')
-          .append('text')
-          .attr('font-size', '13px')
-          .attr('font-family', 'sans-serif')
-          .attr('text-anchor', 'middle')
-          .attr('fill', 'black')
-          .text(event.title || 'hejhej')
+
+          .append('foreignObject')
+
+          .attr('transform', 'translate(500,500)')
           .attr('x', event.centroid[0])
           .attr('y', event.centroid[1])
+          .attr('width', 80)
+          .attr('height', 80)
+          .append('xhtml:div')
+          .style('font', "12px 'Helvetica Neue'")
+          .html(`<h3>${event.title}</h3>`)
+
+          // .append('text')
+          // .attr('font-size', '13px')
+          // .attr('font-family', 'sans-serif')
+          // .attr('fill', 'black')
+          // .text(event.title || 'fel')
+
           .attr('transform', 'translate(500,500)')
+
           .on('click', (e) => {
             setDataObj({
               ...dataObj,
@@ -281,36 +245,12 @@ const DonutWheel = ({ props }): JSX.Element => {
     populateWeeksLower(datesLower, 52, 180, datesLabelLower);
 
     // Category one
-    populateCategoryUpper(
-      cateOneUpper,
-      6,
-      90,
-      392,
-      props.collectionData[0].Category
-    );
-    populateCategoryLower(
-      catOneLower,
-      6,
-      270,
-      401,
-      props.collectionData[0].Category
-    );
+    populateCategoryUpper(cateOneUpper, 6, 90, 392, collectionData[0].Category);
+    populateCategoryLower(catOneLower, 6, 270, 401, collectionData[0].Category);
 
     // Category Two
-    populateCategoryUpper(
-      catTwoUpper,
-      6,
-      90,
-      303,
-      props.collectionData[1].Category
-    );
-    populateCategoryLower(
-      catTwoLower,
-      6,
-      270,
-      312,
-      props.collectionData[1].Category
-    );
+    populateCategoryUpper(catTwoUpper, 6, 90, 303, collectionData[1].Category);
+    populateCategoryLower(catTwoLower, 6, 270, 312, collectionData[1].Category);
 
     // Category three
     populateCategoryUpper(
@@ -318,14 +258,14 @@ const DonutWheel = ({ props }): JSX.Element => {
       6,
       90,
       225,
-      props.collectionData[2].Category
+      collectionData[2].Category
     );
     populateCategoryLower(
       catThreeLower,
       6,
       270,
       234,
-      props.collectionData[2].Category
+      collectionData[2].Category
     );
 
     // Month labels
@@ -348,37 +288,6 @@ const DonutWheel = ({ props }): JSX.Element => {
     drawText(catThreeUpper, 180, svgEl);
     drawText(catThreeLower, 180, svgEl);
   }, [items]);
-
-  let length = d3.scaleLinear().range([0, 1000]);
-
-  let rotationDegree = d3
-    .scalePoint<any>()
-    .domain(d3.range(13))
-    .range([0, 2 * Math.PI]);
-
-  // Replace with list content
-  const futureDate = addDays(new Date(Date.now()), 20);
-
-  // Create "pie-lines"
-  // svgEl
-  //   .selectAll(null)
-  //   .data((d: any, i) => {
-  //     return strokeArr;
-  //   })
-  //   .enter()
-  //   .append('line')
-  //   .attr('x1', 500)
-  //   .attr('y1', 500)
-  //   .attr('x2', (d: any, i: any) => {
-  //     return length(i + 100) * Math.cos(rotationDegree(i));
-  //   })
-  //   .attr('y2', (d: any, i: any) => {
-  //     return length(i + 100) * Math.sin(rotationDegree(i));
-  //   })
-  //   .style('stroke', (d) => {
-  //     return '#003366';
-  //   })
-  //   .style('stroke-width', 0.5);
 
   const DivHover = (): JSX.Element => {
     return (

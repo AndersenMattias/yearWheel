@@ -66,7 +66,7 @@ export const DonutModal = ({
           </div>
           <div className={contentStyles.body}>
             <p>{data.description}</p>
-            <p>{data.start + '-' + data.end}</p>
+            <p>{data.start + ' - ' + data.end}</p>
           </div>
         </Modal>
       </div>

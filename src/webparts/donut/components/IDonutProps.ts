@@ -1,5 +1,5 @@
-export interface IDonutProps  {
+export interface IDonutProps {
   description: string;
-  color: string;
+  colour: string;
   collectionData: any;
 }

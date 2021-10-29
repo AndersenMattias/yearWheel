@@ -3,10 +3,14 @@ import styles from './Donut.module.scss';
 import DonutWheel from './DonutWheel';
 import { IDonutProps } from './IDonutProps';
 
-const Donut = (props: IDonutProps): JSX.Element => {
+const Donut = ({
+  collectionData,
+  description,
+  colour,
+}: IDonutProps): JSX.Element => {
   return (
     <div className={styles.donut}>
-      <DonutWheel props={props} />
+      <DonutWheel collectionData={collectionData} />
     </div>
   );
 };
