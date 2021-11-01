@@ -202,7 +202,7 @@ const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
           .append('textPath')
           .text(data.title)
           .attr('xlink:href', (d, i, j) => {
-            return '#arc-label' + data.id;
+            return '#arc-label' + event.id;
           });
 
         // svgEl
