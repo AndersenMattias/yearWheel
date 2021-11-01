@@ -11,7 +11,6 @@ import {
   monthsLabelLower,
   strokeArr,
   wheelData,
-  wheelEventData,
 } from './DonutWheelData';
 
 import {
@@ -20,16 +19,13 @@ import {
   getDayOfYear,
   getCentroid,
   getDegreeFromDay,
-  populateCategoryLower,
-  populateCategoryUpper,
-  populateMonthsArrLower,
-  populateMonthsArrUpper,
-  populateWeeksLower,
-  populateWeeksUpper,
   dateWithoutTime,
+  populateMonthLabels,
+  populateDateLabels,
+  populateCategoryLabels,
 } from './DonutHandler';
 
-import { Arc, IDonutWheelProps, IListObj } from './interfaces/IDonut';
+import { IDonutWheelProps, IListObj } from './interfaces/IDonut';
 
 import { DonutModal } from './DonutModal';
 
@@ -147,8 +143,8 @@ const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
             end
           ),
           textLabel: textArc({
-            innerRadius: wheel.innerRadius,
-            outerRadius: wheel.outerRadius,
+            innerRadius: wheel.innerRadius + 50,
+            outerRadius: wheel.outerRadius - 50,
             startAngle: start,
             endAngle: end,
           }),
@@ -161,23 +157,26 @@ const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
 
       mappedArcs.forEach((event) => {
         let data = mappedItems.find((d) => d.id == event.id);
-        console.log(event);
 
-        // TODO:
-        // Lägg till text här på path?
-        svgEl
+        let pathGroup = svgEl
           .append('g')
+          .attr('id', 'pathGroup')
           .append('path')
+          .attr('id', (i) => {
+            return '#arc-label' + event.id;
+          })
           .attr('d', event.arcSvg)
           .style('fill', event.colour)
-          .attr('transform', 'translate(500,500)')
+          .attr('transform', 'translate(500,500)');
 
-          .on('mouseenter', (e) => {
+        pathGroup
+          .style('cursor', 'pointer')
+          .on('mouseover', (e) => {
             setTextValue(event.title);
             setDateValue(data.startDate + ' - ' + data.endDate);
             setShowDiv(true);
           })
-          .on('mouseleave', (e) => {
+          .on('mouseout', (e) => {
             setShowDiv(false);
           })
           .on('click', (e) => {
@@ -192,118 +191,79 @@ const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
             setIsModalOpen(true);
           });
 
-        let textGroup = svgEl.selectAll('g');
-
-        textGroup
-          .append('path')
-          .attr('fill', 'none')
-          .attr('d', event.textLabel)
-          .attr('id', (d, i, j) => {
-            return 'arc-label' + i;
-          })
-          .attr('transform', 'translate(500,500)');
-
-        let label = textGroup
+        svgEl
+          .selectAll('#pathGroup')
+          .append('g')
+          .attr('id', 'textGroup')
           .append('text')
-          .attr('x', event.centroid[0])
-          .attr('y', event.centroid[1])
-
-          .style('font-size', '20px')
-          .attr('text-anchor', 'center');
-
-        label
+          .style('text-anchor', 'middle')
+          .style('font', "12px 'Helvetica Neue'")
+          .style('fill', 'white')
           .append('textPath')
-          .attr('startOffset', '10%')
+          .text(data.title)
           .attr('xlink:href', (d, i, j) => {
-            return '#arc-label' + i;
-          })
-          .style('fill', '#000')
-          .text(event.title);
+            return '#arc-label' + data.id;
+          });
 
-        // .append('text')
-        // .style('font-size', '20px')
-        // .attr('text-anchor', 'middle')
-        // .attr('x', event.centroid[0])
-        // .attr('y', event.centroid[1])
-        // .attr('transform', 'translate(500,500)');
-
-        // textGroup
-        //   .append('textPath')
-        //   .attr('startOffset', '25%')
-        //   .attr('xlink:href', function (d, i, j) {
-        //     return '#arc-label' + i + '-' + j;
-        //   })
-        //   .style('fill', '#000')
-        //   .text(event.title);
-
-        // textGroup; // svgEl
+        // svgEl
         //   .append('foreignObject')
         //   .attr('transform', 'translate(500,500)')
-        // .attr('x', event.centroid[0])
-        // .attr('y', event.centroid[1])
+        //   .attr('x', event.centroid[0])
+        //   .attr('y', event.centroid[1])
         //   .attr('width', 80)
         //   .attr('height', 80)
         //   .append('xhtml:div')
+        //   .style('height', '80px')
+        //   .style('width', '80px')
+
         //   .style('font', "12px 'Helvetica Neue'")
-        //   .html(`<h3>${event.title}</h3>`)
-
-        // .append('text')
-        // .attr('font-size', '13px')
-        // .attr('font-family', 'sans-serif')
-        // .attr('fill', 'black')
-        // .text(event.title || 'fel')
-
-        // .attr('transform', 'translate(500,500)')
-
-        // .on('click', (e) => {
-        //   setDataObj({
-        //     ...dataObj,
-        //     title: data.title,
-        //     description: data.description,
-        //     start: data.startDate,
-        //     end: data.endDate,
-        //     location: data.location,
-        //   });
-        //   setIsModalOpen(true);
-        // })
-        // .on('mouseenter', (e) => {
-        //   setTextValue(event.title);
-        //   setDateValue(data.startDate + ' - ' + data.endDate);
-        //   setShowDiv(true);
-        // })
-        // .on('mouseleave', (e) => {
-        //   setShowDiv(false);
-        // });
-
-        svgEl.selectAll('g').style('cursor', 'pointer');
+        //   .html(`<h3 >${event.title}</h3>`);
       });
     }
 
     // Populate array with data - months
-    populateMonthsArrUpper(monthTextUpper, 24, 180, monthsLabelUpper);
-    populateMonthsArrLower(monthTextLower, 24, 0, monthsLabelLower);
+    populateMonthLabels(monthTextUpper, 24, 180, monthsLabelUpper, 488, 11);
+    populateMonthLabels(monthTextLower, 24, 0, monthsLabelLower, 497, 11);
 
     // Populate array with data - days
-    populateWeeksUpper(datesUpper, 52, 0, datesLabelUpper);
-    populateWeeksLower(datesLower, 52, 180, datesLabelLower);
+    populateDateLabels(datesUpper, 52, 0, datesLabelUpper, 473, 26);
+    populateDateLabels(datesLower, 52, 180, datesLabelLower, 482, 26);
 
     // Category one
-    populateCategoryUpper(cateOneUpper, 6, 90, 392, collectionData[0].Category);
-    populateCategoryLower(catOneLower, 6, 270, 401, collectionData[0].Category);
+    populateCategoryLabels(
+      cateOneUpper,
+      6,
+      90,
+      392,
+      collectionData[0].Category
+    );
+    populateCategoryLabels(
+      catOneLower,
+      6,
+      270,
+      401,
+      collectionData[0].Category
+    );
 
     // Category Two
-    populateCategoryUpper(catTwoUpper, 6, 90, 303, collectionData[1].Category);
-    populateCategoryLower(catTwoLower, 6, 270, 312, collectionData[1].Category);
+    populateCategoryLabels(catTwoUpper, 6, 90, 303, collectionData[1].Category);
+    populateCategoryLabels(
+      catTwoLower,
+      6,
+      270,
+      312,
+      collectionData[1].Category
+    );
 
     // Category three
-    populateCategoryUpper(
+    populateCategoryLabels(
       catThreeUpper,
       6,
       90,
       225,
       collectionData[2].Category
     );
-    populateCategoryLower(
+    populateCategoryLabels(
       catThreeLower,
       6,
       270,

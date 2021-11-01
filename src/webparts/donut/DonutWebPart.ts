@@ -108,6 +108,7 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
                           text: 'Cirkel fyra - Kategori 3',
                         },
                       ],
+                      required: true,
                     },
                     {
                       id: 'Colour',

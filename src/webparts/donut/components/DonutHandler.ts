@@ -35,7 +35,7 @@ export const calcAngleDegrees = (fromX, fromY, toX, toY, force360 = true) => {
     while (degrees >= 360) degrees -= 360;
     while (degrees < 0) degrees += 360;
   }
-  console.log('angle to degree:', { deltaX, deltaY, radians, degrees });
+  // console.log('angle to degree:', { deltaX, deltaY, radians, degrees });
   return degrees;
 };
 
@@ -88,111 +88,48 @@ export const drawText = (arr: any[], rotate: number, svgEl) => {
   });
 };
 
-export const populateArr = (
-  arr,
-  divider: number,
-  radius: number,
-  text?: string
-) => {
-  for (let i = 0; i < 360; i += 360 / divider) {
-    arr.push({
-      coords: getXY(radius, i, 500),
-    });
-  }
-};
-
-export const populateMonthsArrUpper = (
+export const populateMonthLabels = (
   arr,
   divider: number,
   angel: number,
-  text: string[]
+  labels: string[],
+  radius: number,
+  countRealIndex?: number
 ) => {
   let index = 0;
-  let realIndex = 11;
+  let realIndex = countRealIndex;
   for (let i = 0; i <= 360; i += 360 / divider) {
     index++;
     if (index % 2 == 0) {
       arr.push({
-        title: text[realIndex] || '',
-        coords: getXY(488, i - angel, 500),
+        title: labels[realIndex] || '',
+        coords: getXY(radius, i - angel, 500),
         angle: i,
       });
       realIndex--;
     }
   }
 };
-
-export const populateMonthsArrLower = (
+export const populateDateLabels = (
   arr,
   divider: number,
   angel: number,
-  text: string[]
-) => {
-  let index = 0;
-  let realIndex = 11;
-  for (let i = 0; i <= 360; i += 360 / divider) {
-    index++;
-    if (index % 2 == 0) {
-      arr.push({
-        title: text[realIndex] || '',
-        coords: getXY(497, i - angel, 500),
-        angle: i,
-      });
-      realIndex--;
-    }
-  }
-};
-
-export const populateWeeksUpper = (
-  arr,
-  divider: number,
-  angel: number,
-  text: string[]
-) => {
-  let realIndex = 26;
-  for (let i = 0; i < 360; i += 360 / divider) {
-    arr.push({
-      title: text[realIndex] || '',
-      coords: getXY(473, i - angel, 500),
-      angle: i,
-    });
-    realIndex--;
-  }
-};
-
-export const populateWeeksLower = (
-  arr,
-  divider: number,
-  angel: number,
-  text: string[]
-) => {
-  let realIndex = 26;
-  for (let i = 0; i < 360; i += 360 / divider) {
-    arr.push({
-      title: text[realIndex] || '',
-      coords: getXY(482, i - angel, 500),
-      angle: i,
-    });
-    realIndex--;
-  }
-};
-
-export const populateCategoryUpper = (
-  arr,
-  divider: number,
-  angel: number,
+  labels: string[],
   radius: number,
-  text: string
+  countRealIndex?: number
 ) => {
+  let realIndex = countRealIndex;
   for (let i = 0; i < 360; i += 360 / divider) {
     arr.push({
-      title: i >= 90 && i <= 270 ? text : '',
+      title: labels[realIndex] || '',
       coords: getXY(radius, i - angel, 500),
       angle: i,
     });
+    realIndex--;
   }
 };
-export const populateCategoryLower = (
+
+export const populateCategoryLabels = (
   arr,
   divider: number,
   angel: number,
