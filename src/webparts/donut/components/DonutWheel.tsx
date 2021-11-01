@@ -129,6 +129,7 @@ const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
         let wheel = wheelData.find((c) => c.category == item.category);
 
         const arc = d3.arc();
+        const textArc = d3.arc();
         const start = getDegreeFromDay(item.startDay) * (Math.PI / 180);
         const end = getDegreeFromDay(item.endDay) * (Math.PI / 180);
 
@@ -145,6 +146,12 @@ const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
             start,
             end
           ),
+          textLabel: textArc({
+            innerRadius: wheel.innerRadius,
+            outerRadius: wheel.outerRadius,
+            startAngle: start,
+            endAngle: end,
+          }),
           // TODO: Fixa färg för event, lägger till men endast efter rerender?
           colour: wheel.eventColour,
           title: item.title,
@@ -154,13 +161,16 @@ const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
 
       mappedArcs.forEach((event) => {
         let data = mappedItems.find((d) => d.id == event.id);
+        console.log(event);
 
+        // TODO:
+        // Lägg till text här på path?
         svgEl
           .append('g')
           .append('path')
           .attr('d', event.arcSvg)
-          .attr('transform', 'translate(500,500)')
           .style('fill', event.colour)
+          .attr('transform', 'translate(500,500)')
 
           .on('mouseenter', (e) => {
             setTextValue(event.title);
@@ -182,57 +192,90 @@ const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
             setIsModalOpen(true);
           });
 
-        // svgEl
-        //   .append('g')
-        //   .append('text')
-        // .attr('x', event.centroid[0])
-        // .attr('y', event.centroid[1])
-        //   .attr('transform', 'translate(500,500)')
+        let textGroup = svgEl.selectAll('g');
 
-        //   .text('We go up, then we go down, then up again.')
+        textGroup
+          .append('path')
+          .attr('fill', 'none')
+          .attr('d', event.textLabel)
+          .attr('id', (d, i, j) => {
+            return 'arc-label' + i;
+          })
+          .attr('transform', 'translate(500,500)');
 
-        svgEl.selectAll('g').style('cursor', 'pointer');
-
-        svgEl
-
-          .append('foreignObject')
-
-          .attr('transform', 'translate(500,500)')
+        let label = textGroup
+          .append('text')
           .attr('x', event.centroid[0])
           .attr('y', event.centroid[1])
-          .attr('width', 80)
-          .attr('height', 80)
-          .append('xhtml:div')
-          .style('font', "12px 'Helvetica Neue'")
-          .html(`<h3>${event.title}</h3>`)
 
-          // .append('text')
-          // .attr('font-size', '13px')
-          // .attr('font-family', 'sans-serif')
-          // .attr('fill', 'black')
-          // .text(event.title || 'fel')
+          .style('font-size', '20px')
+          .attr('text-anchor', 'center');
 
-          .attr('transform', 'translate(500,500)')
-
-          .on('click', (e) => {
-            setDataObj({
-              ...dataObj,
-              title: data.title,
-              description: data.description,
-              start: data.startDate,
-              end: data.endDate,
-              location: data.location,
-            });
-            setIsModalOpen(true);
+        label
+          .append('textPath')
+          .attr('startOffset', '10%')
+          .attr('xlink:href', (d, i, j) => {
+            return '#arc-label' + i;
           })
-          .on('mouseenter', (e) => {
-            setTextValue(event.title);
-            setDateValue(data.startDate + ' - ' + data.endDate);
-            setShowDiv(true);
-          })
-          .on('mouseleave', (e) => {
-            setShowDiv(false);
-          });
+          .style('fill', '#000')
+          .text(event.title);
+
+        // .append('text')
+        // .style('font-size', '20px')
+        // .attr('text-anchor', 'middle')
+        // .attr('x', event.centroid[0])
+        // .attr('y', event.centroid[1])
+        // .attr('transform', 'translate(500,500)');
+
+        // textGroup
+        //   .append('textPath')
+        //   .attr('startOffset', '25%')
+        //   .attr('xlink:href', function (d, i, j) {
+        //     return '#arc-label' + i + '-' + j;
+        //   })
+        //   .style('fill', '#000')
+        //   .text(event.title);
+
+        // textGroup; // svgEl
+        //   .append('foreignObject')
+        //   .attr('transform', 'translate(500,500)')
+        // .attr('x', event.centroid[0])
+        // .attr('y', event.centroid[1])
+        //   .attr('width', 80)
+        //   .attr('height', 80)
+        //   .append('xhtml:div')
+        //   .style('font', "12px 'Helvetica Neue'")
+        //   .html(`<h3>${event.title}</h3>`)
+
+        // .append('text')
+        // .attr('font-size', '13px')
+        // .attr('font-family', 'sans-serif')
+        // .attr('fill', 'black')
+        // .text(event.title || 'fel')
+
+        // .attr('transform', 'translate(500,500)')
+
+        // .on('click', (e) => {
+        //   setDataObj({
+        //     ...dataObj,
+        //     title: data.title,
+        //     description: data.description,
+        //     start: data.startDate,
+        //     end: data.endDate,
+        //     location: data.location,
+        //   });
+        //   setIsModalOpen(true);
+        // })
+        // .on('mouseenter', (e) => {
+        //   setTextValue(event.title);
+        //   setDateValue(data.startDate + ' - ' + data.endDate);
+        //   setShowDiv(true);
+        // })
+        // .on('mouseleave', (e) => {
+        //   setShowDiv(false);
+        // });
+
+        svgEl.selectAll('g').style('cursor', 'pointer');
       });
     }
 
