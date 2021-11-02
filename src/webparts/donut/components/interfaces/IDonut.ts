@@ -16,8 +16,24 @@ export interface IListObj {
   location?: string;
 }
 
+export interface IListEvent {
+  Title?: any;
+  Category?: any;
+  Description?: any;
+  StartDate?: any;
+  DueDate?: any;
+}
+
+export interface IDonutProps {
+  description: string;
+  colour: string;
+  collectionData: any[];
+  eventListData: any[];
+}
+
 export interface IDonutWheelProps {
   collectionData: string | number | any;
+  eventListData: string | number | any;
 }
 
 export interface IDonutModalProps {
@@ -25,4 +41,16 @@ export interface IDonutModalProps {
   setIsModalOpen: any;
   items?: any[];
   data: IListObj;
+}
+
+export interface IDonutWebPartProps {
+  description: string;
+  categoryOption: string;
+  collectionData: any;
+  eventListData: any;
+  colour: string;
+}
+
+export interface IPropertyControlsTestWebPartProps {
+  colour: string;
 }

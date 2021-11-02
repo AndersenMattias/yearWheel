@@ -23,9 +23,10 @@ import {
   populateMonthLabels,
   populateDateLabels,
   populateCategoryLabels,
+  addEvent,
 } from './DonutHandler';
 
-import { IDonutWheelProps, IListObj } from './interfaces/IDonut';
+import { IDonutWheelProps, IListEvent, IListObj } from './interfaces/IDonut';
 
 import { DonutModal } from './DonutModal';
 
@@ -33,14 +34,20 @@ import { sp } from '@pnp/sp';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
+import { IItemAddResult } from '@pnp/sp/items';
+import { add } from 'lodash';
 
-const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
+const DonutWheel = ({
+  collectionData,
+  eventListData,
+}: IDonutWheelProps): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showDiv, setShowDiv] = useState<boolean>(false);
   const [items, setItems] = useState<any>([]);
   const [textValue, setTextValue] = useState<string>('');
   const [dateValue, setDateValue] = useState<string>('');
   const [dataObj, setDataObj] = useState<IListObj>({});
+  const [eventData, setEventData] = useState<any>([{}]);
 
   const ref = useRef();
 
@@ -59,6 +66,8 @@ const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
   let catThreeUpper = [];
   let catThreeLower = [];
 
+  let itemListData = [];
+
   useEffect(() => {
     const fetchList = async () => {
       const items: any[] = await sp.web.lists
@@ -70,9 +79,24 @@ const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
     fetchList();
   }, []);
 
+  const addEventToList = async (listItem) => {
+    const eventItem = await sp.web.lists.getByTitle('EventPlanner').items.add({
+      Title: listItem.eventTitle,
+      Category: listItem.selectedCategory,
+      Description: listItem.eventDescription,
+      StartDate: listItem.startDate,
+      DueDate: listItem.endDate,
+    });
+  };
+
+  // eventListData.forEach((item) => {
+  //   addEventToList(item);
+  // });
+
   useEffect(() => {
     if (items.length >= 1) {
       const mappedItems = items.map((item) => {
+        console.log(item);
         return {
           id: item.Id,
           title: item.Title,
@@ -192,24 +216,27 @@ const DonutWheel = ({ collectionData }: IDonutWheelProps): JSX.Element => {
           });
 
         svgEl
-          .selectAll('#pathGroup')
+          .selectAll('g')
+          // .attr('id', 'textGroup')
           .append('g')
-          .attr('id', 'textGroup')
           .append('text')
+          .attr('x', event.centroid[0])
+          .attr('y', event.centroid[1])
           .style('text-anchor', 'middle')
           .style('font', "12px 'Helvetica Neue'")
-          .style('fill', 'white')
-          .append('textPath')
-          .text(data.title)
-          .attr('xlink:href', (d, i, j) => {
-            return '#arc-label' + event.id;
-          });
+          .style('fill', 'black')
+          // .append('textPath')
+          .text(event.title)
+          .attr('transform', 'translate(500,500)');
+        // .attr('xlink:href', (d, i, j) => {
+        //   return '#arc-label' + event.id;
+        // });
 
         // svgEl
         //   .append('foreignObject')
         //   .attr('transform', 'translate(500,500)')
-        //   .attr('x', event.centroid[0])
-        //   .attr('y', event.centroid[1])
+        // .attr('x', event.centroid[0])
+        // .attr('y', event.centroid[1])
         //   .attr('width', 80)
         //   .attr('height', 80)
         //   .append('xhtml:div')

@@ -1,3 +1,9 @@
+import { IItemAddResult } from '@pnp/sp/items';
+import { sp } from '@pnp/sp';
+import '@pnp/sp/webs';
+import '@pnp/sp/lists';
+import '@pnp/sp/items';
+
 export const getDegreeFromDay = (dayOfYear) => (365 / 360) * dayOfYear;
 
 export const getDayOfYear = (date) => {
@@ -14,7 +20,6 @@ export const getDayOfYear = (date) => {
 
 export const dateWithoutTime = (date) => {
   let newDate = new Date(date).toISOString().slice(0, 10);
-
   return newDate;
 };
 
@@ -66,6 +71,19 @@ export const addWheeldata = (
     category: category.pickCategory,
     eventColour: evColour.eventColour,
   });
+};
+
+export const addEvent = async (listItem) => {
+  const iar: IItemAddResult = await sp.web.lists
+    .getByTitle('EventPlanner')
+    .items.add({
+      Title: listItem.eventTitle,
+      Category: listItem.selectedCategory,
+      Description: listItem.eventDescription,
+      StartDate: listItem.startDate,
+      DueDate: listItem.endDate,
+    });
+  return iar;
 };
 
 export const drawText = (arr: any[], rotate: number, svgEl) => {

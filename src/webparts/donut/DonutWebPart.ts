@@ -1,45 +1,29 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
-import {
-  IPropertyPaneConfiguration,
-  PropertyPaneTextField,
-  PropertyPaneCheckbox,
-  PropertyPaneLabel,
-  PropertyPaneLink,
-  PropertyPaneSlider,
-  PropertyPaneToggle,
-  PropertyPaneDropdown,
-  PropertyPaneButton,
-  PropertyPaneButtonType,
-  PropertyPaneChoiceGroup,
-} from '@microsoft/sp-property-pane';
+import { IPropertyPaneConfiguration } from '@microsoft/sp-property-pane';
 
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
 import * as strings from 'DonutWebPartStrings';
-import { IDonutProps } from './components/IDonutProps';
+
 import Donut from './components/Donut';
-import DonutColorPicker from './components/DonutColorPicker';
 
 import {
   PropertyFieldCollectionData,
   CustomCollectionFieldType,
 } from '@pnp/spfx-property-controls/lib/PropertyFieldCollectionData';
 
-export interface IDonutWebPartProps {
-  description: string;
-  secondCircleTitle: string;
-  thirdCircleTitle: string;
-  fourthCircleTitle: string;
-  categoryOption: string;
-  collectionData: any;
-  colour: string;
-}
+import {
+  DateTimePicker,
+  DateConvention,
+  TimeConvention,
+} from '@pnp/spfx-controls-react/lib/DateTimePicker';
 
-export interface IPropertyControlsTestWebPartProps {
-  colour: string;
-}
+import {
+  IDonutProps,
+  IDonutWebPartProps,
+} from './components/interfaces/IDonut';
 
 export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartProps> {
   public render(): void {
@@ -49,6 +33,7 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
         description: this.properties.description,
         colour: this.properties.colour,
         collectionData: this.properties.collectionData,
+        eventListData: this.properties.eventListData,
       }
     );
 
@@ -78,7 +63,7 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
                   key: 'collectionData',
                   label: 'Collection data',
                   panelHeader: 'Collection data panel header',
-                  manageBtnLabel: 'Settings',
+                  manageBtnLabel: 'Inställningar',
                   value: this.properties.collectionData,
                   fields: [
                     {
@@ -121,6 +106,111 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
                       type: CustomCollectionFieldType.string,
                     },
                   ],
+                }),
+
+                PropertyFieldCollectionData('eventListData', {
+                  key: 'collectionDataFieldId',
+                  label: '',
+                  panelHeader: 'Lägg till event',
+                  manageBtnLabel: 'Lägg till event',
+                  value: this.properties.eventListData,
+                  fields: [
+                    {
+                      id: 'eventTitle',
+                      title: 'Titel',
+                      type: CustomCollectionFieldType.string,
+                    },
+                    {
+                      id: 'selectedCategory',
+                      title: 'Välj kategori',
+                      type: CustomCollectionFieldType.dropdown,
+                      options: [
+                        {
+                          key: 'Generell',
+                          text: 'Generell',
+                        },
+                        {
+                          key: 'Kategori 1',
+                          text: 'Cirkel två',
+                        },
+                        {
+                          key: 'Kategori 2',
+                          text: 'Cirkel tre',
+                        },
+                        {
+                          key: 'Kategori 3',
+                          text: 'Cirkel fyra',
+                        },
+                      ],
+                      required: true,
+                    },
+                    {
+                      id: 'eventDescription',
+                      title: 'Beskrivning',
+                      type: CustomCollectionFieldType.string,
+                    },
+                    {
+                      id: 'categoryColour',
+                      title: 'Färg för cirkeln',
+                      type: CustomCollectionFieldType.string,
+                    },
+                    {
+                      id: 'eventColour',
+                      title: 'Välj färg för event',
+                      type: CustomCollectionFieldType.string,
+                    },
+                    {
+                      id: 'startDate',
+                      title: 'Startdatum',
+                      type: CustomCollectionFieldType.custom,
+                      required: false,
+                      onCustomRender: (
+                        field,
+                        value,
+                        onUpdate,
+                        item,
+                        itemId
+                      ) => {
+                        return React.createElement(DateTimePicker, {
+                          key: itemId,
+                          showLabels: false,
+                          dateConvention: DateConvention.Date,
+                          showGoToToday: true,
+                          showMonthPickerAsOverlay: true,
+                          value: value ? new Date(value) : null,
+                          onChange: (date: Date) => {
+                            onUpdate(field.id, date);
+                          },
+                        });
+                      },
+                    },
+                    {
+                      id: 'endDate',
+                      title: 'Slutdatum',
+                      type: CustomCollectionFieldType.custom,
+                      required: false,
+                      onCustomRender: (
+                        field,
+                        value,
+                        onUpdate,
+                        item,
+                        itemId
+                      ) => {
+                        return React.createElement(DateTimePicker, {
+                          key: itemId,
+                          showLabels: false,
+                          dateConvention: DateConvention.Date,
+                          showGoToToday: true,
+                          showMonthPickerAsOverlay: true,
+                          value: value ? new Date(value) : null,
+                          onChange: (date: Date) => {
+                            onUpdate(field.id, date);
+                          },
+                        });
+                      },
+                    },
+                  ],
+                  disabled: false,
                 }),
               ],
             },
