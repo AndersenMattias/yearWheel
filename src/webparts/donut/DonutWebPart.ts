@@ -1,9 +1,13 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
-import { Version } from '@microsoft/sp-core-library';
-import { IPropertyPaneConfiguration } from '@microsoft/sp-property-pane';
+import { v4 as uuid } from 'uuid';
 
-import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
+import { Version } from '@microsoft/sp-core-library';
+
+import {
+  BaseClientSideWebPart,
+  IPropertyPaneConfiguration,
+} from '@microsoft/sp-webpart-base';
 
 import * as strings from 'DonutWebPartStrings';
 
@@ -44,9 +48,9 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
     ReactDom.unmountComponentAtNode(this.domElement);
   }
 
-  protected get dataVersion(): Version {
-    return Version.parse('1.0');
-  }
+  // protected get dataVersion(): Version {
+  //   return Version.parse('1.0');
+  // }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
@@ -111,10 +115,35 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
                 PropertyFieldCollectionData('eventListData', {
                   key: 'collectionDataFieldId',
                   label: '',
-                  panelHeader: 'Lägg till event',
+                  panelHeader: 'Eventlista',
                   manageBtnLabel: 'Lägg till event',
                   value: this.properties.eventListData,
                   fields: [
+                    {
+                      id: 'eventId',
+                      title: 'Id',
+                      type: CustomCollectionFieldType.custom,
+                      onCustomRender: (
+                        field,
+                        value,
+                        onUpdate,
+                        item,
+                        itemId,
+                        onError
+                      ) => {
+                        return React.createElement('input', {
+                          key: itemId,
+                          value: uuid(),
+                          onChange: (
+                            event: React.FormEvent<HTMLInputElement>
+                          ) => {
+                            onUpdate(field.id, event.currentTarget.value);
+                          },
+
+                          disabled: true,
+                        });
+                      },
+                    },
                     {
                       id: 'eventTitle',
                       title: 'Titel',
@@ -149,11 +178,11 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
                       title: 'Beskrivning',
                       type: CustomCollectionFieldType.string,
                     },
-                    {
-                      id: 'categoryColour',
-                      title: 'Färg för cirkeln',
-                      type: CustomCollectionFieldType.string,
-                    },
+                    // {
+                    //   id: 'categoryColour',
+                    //   title: 'Färg för cirkeln',
+                    //   type: CustomCollectionFieldType.string,
+                    // },
                     {
                       id: 'eventColour',
                       title: 'Välj färg för event',

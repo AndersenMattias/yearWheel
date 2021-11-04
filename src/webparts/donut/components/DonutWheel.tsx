@@ -9,7 +9,6 @@ import {
   datesLabelLower,
   monthsLabelUpper,
   monthsLabelLower,
-  strokeArr,
   wheelData,
 } from './DonutWheelData';
 
@@ -23,7 +22,8 @@ import {
   populateMonthLabels,
   populateDateLabels,
   populateCategoryLabels,
-  addEvent,
+  drawArcCircles,
+  addToList,
 } from './DonutHandler';
 
 import { IDonutWheelProps, IListEvent, IListObj } from './interfaces/IDonut';
@@ -31,11 +31,10 @@ import { IDonutWheelProps, IListEvent, IListObj } from './interfaces/IDonut';
 import { DonutModal } from './DonutModal';
 
 import { sp } from '@pnp/sp';
+import { IItemAddResult } from '@pnp/sp/items';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
-import { IItemAddResult } from '@pnp/sp/items';
-import { add } from 'lodash';
 
 const DonutWheel = ({
   collectionData,
@@ -47,7 +46,6 @@ const DonutWheel = ({
   const [textValue, setTextValue] = useState<string>('');
   const [dateValue, setDateValue] = useState<string>('');
   const [dataObj, setDataObj] = useState<IListObj>({});
-  const [eventData, setEventData] = useState<any>([{}]);
 
   const ref = useRef();
 
@@ -66,8 +64,6 @@ const DonutWheel = ({
   let catThreeUpper = [];
   let catThreeLower = [];
 
-  let itemListData = [];
-
   useEffect(() => {
     const fetchList = async () => {
       const items: any[] = await sp.web.lists
@@ -79,24 +75,72 @@ const DonutWheel = ({
     fetchList();
   }, []);
 
-  const addEventToList = async (listItem) => {
-    const eventItem = await sp.web.lists.getByTitle('EventPlanner').items.add({
-      Title: listItem.eventTitle,
-      Category: listItem.selectedCategory,
-      Description: listItem.eventDescription,
-      StartDate: listItem.startDate,
-      DueDate: listItem.endDate,
-    });
-  };
+  // useEffect(() => {
+  //   const addToList = async (
+  //     title,
+  //     description,
+  //     category,
+  //     startDate,
+  //     endDate
+  //   ) => {
+  //     const iar: IItemAddResult = await sp.web.lists
+  //       .getByTitle('EventPlanner')
+  //       .items.add({
+  //         Title: title.eventTitle,
+  //         Description: description.eventDescription,
+  //         Category: category.selectedCategory,
+  //         StartDate: startDate.startDate,
+  //         DueDate: endDate.endDate,
+  //       });
+  //     return iar;
+  //   };
 
   // eventListData.forEach((item) => {
-  //   addEventToList(item);
+  //   console.log(item);
+  //   let alreadyInList = items.find((x) => x.uniqueId == item.uniqueId);
+  //   if (!alreadyInList) {
+  //     console.log('lägger till');
+  //     // addToList(item, item, item, item, item);
+  //   } else {
+  //     console.log('finns redan');
+  //     return;
+  //   }
+  //   // addToList(item, item, item, item, item);
   // });
+  // }, []);
+
+  // const addEventToList = async (listItem) => {
+  //   const iar: IItemAddResult = await sp.web.lists
+  //     .getByTitle('EventPlanner')
+  //     .items.add({
+  // Title: listItem.eventTitle,
+  // Description: listItem.eventDescription,
+  // Category: listItem.selectedCategory,
+  // StartDate: listItem.startDate,
+  // DueDate: listItem.endDate,
+  //     });
+  //   return iar;
+  // };
+
+  eventListData.forEach((item) => {
+    // console.log('item', item);
+    // console.log('items', items);
+    let alreadyInList = items.find((x) => x.uniqueId == item.uniqueId);
+    if (!alreadyInList) {
+      // addToList(item, item, item, item, item);
+      console.log('lägger till');
+    } else {
+      console.log('finns redan');
+      return;
+    }
+    // addToList(item, item, item, item, item);
+  });
 
   useEffect(() => {
+    console.log('eventListData', eventListData);
     if (items.length >= 1) {
+      // console.log(items);
       const mappedItems = items.map((item) => {
-        console.log(item);
         return {
           id: item.Id,
           title: item.Title,
@@ -123,27 +167,8 @@ const DonutWheel = ({
         }
       });
 
-      let wheelBase = wheelData.map((base) => {
-        const arc = d3.arc();
-        return {
-          arcSvg: arc({
-            innerRadius: base.innerRadius,
-            outerRadius: base.outerRadius,
-            startAngle: base.startAngle,
-            endAngle: base.endAngle,
-          }),
-          colour: base.colour,
-          category: base.category,
-        };
-      });
-
-      wheelBase.forEach((base) =>
-        svgEl
-          .append('path')
-          .attr('d', base.arcSvg)
-          .style('fill', base.colour)
-          .attr('transform', 'translate(500,500)')
-      );
+      //  create arc for each circle
+      drawArcCircles(wheelData, svgEl);
 
       let mappedArcs = mappedItems.map((item) => {
         let wheel = wheelData.find((c) => c.category == item.category);
@@ -246,6 +271,20 @@ const DonutWheel = ({
         //   .style('font', "12px 'Helvetica Neue'")
         //   .html(`<h3 >${event.title}</h3>`);
       });
+    } else {
+      collectionData.forEach((data, index) => {
+        if (index == 0) {
+          addWheeldata(wheelData, 405, 470, data, 'Generell', '');
+        } else if (index == 1) {
+          addWheeldata(wheelData, 390, 317, data, 'Kategori 1', '');
+        } else if (index == 2) {
+          addWheeldata(wheelData, 300, 240, data, 'Kategori 2', '');
+        } else if (index == 3) {
+          addWheeldata(wheelData, 224, 154, data, 'Kategori 3', '');
+        }
+      });
+
+      drawArcCircles(wheelData, svgEl);
     }
 
     // Populate array with data - months
@@ -262,24 +301,30 @@ const DonutWheel = ({
       6,
       90,
       392,
-      collectionData[0].Category
+      collectionData[0].Category || 'Kategori 1'
     );
     populateCategoryLabels(
       catOneLower,
       6,
       270,
       401,
-      collectionData[0].Category
+      collectionData[0].Category || 'Kategori 1'
     );
 
     // Category Two
-    populateCategoryLabels(catTwoUpper, 6, 90, 303, collectionData[1].Category);
+    populateCategoryLabels(
+      catTwoUpper,
+      6,
+      90,
+      303,
+      collectionData[1].Category || 'Kategori 2'
+    );
     populateCategoryLabels(
       catTwoLower,
       6,
       270,
       312,
-      collectionData[1].Category
+      collectionData[1].Category || 'Kategori 2'
     );
 
     // Category three
@@ -288,14 +333,14 @@ const DonutWheel = ({
       6,
       90,
       225,
-      collectionData[2].Category
+      collectionData[2].Category || 'Kategori 3'
     );
     populateCategoryLabels(
       catThreeLower,
       6,
       270,
       234,
-      collectionData[2].Category
+      collectionData[2].Category || 'Kategori 3'
     );
 
     // Month labels

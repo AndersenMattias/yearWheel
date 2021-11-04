@@ -3,6 +3,7 @@ import { sp } from '@pnp/sp';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
+import * as d3 from 'd3';
 
 export const getDegreeFromDay = (dayOfYear) => (365 / 360) * dayOfYear;
 
@@ -73,17 +74,47 @@ export const addWheeldata = (
   });
 };
 
-export const addEvent = async (listItem) => {
+export const addToList = async (
+  title,
+  description,
+  category,
+  startDate,
+  endDate
+) => {
   const iar: IItemAddResult = await sp.web.lists
     .getByTitle('EventPlanner')
     .items.add({
-      Title: listItem.eventTitle,
-      Category: listItem.selectedCategory,
-      Description: listItem.eventDescription,
-      StartDate: listItem.startDate,
-      DueDate: listItem.endDate,
+      Title: title.eventTitle,
+      Description: description.eventDescription,
+      Category: category.selectedCategory,
+      StartDate: startDate.startDate,
+      DueDate: endDate.endDate,
     });
   return iar;
+};
+
+export const drawArcCircles = (arr, svg) => {
+  let wheelBase = arr.map((base) => {
+    const arc = d3.arc();
+    return {
+      arcSvg: arc({
+        innerRadius: base.innerRadius,
+        outerRadius: base.outerRadius,
+        startAngle: base.startAngle,
+        endAngle: base.endAngle,
+      }),
+      colour: base.colour,
+      category: base.category,
+    };
+  });
+
+  wheelBase.forEach((base) =>
+    svg
+      .append('path')
+      .attr('d', base.arcSvg)
+      .style('fill', base.colour)
+      .attr('transform', 'translate(500,500)')
+  );
 };
 
 export const drawText = (arr: any[], rotate: number, svgEl) => {
