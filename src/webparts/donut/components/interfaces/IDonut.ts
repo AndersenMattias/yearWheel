@@ -25,15 +25,39 @@ export interface IListEvent {
 }
 
 export interface IDonutProps {
-  description: string;
-  colour: string;
+  colour: string
   collectionData: any[];
-  eventListData: any[];
+  eventListData: any;
+  selectedCategory: any;
+  circelOneTitle: string;
+  circleOneColour: string;
+  circleOneEvCol: string;
+  circleTwoTitle: string;
+  circleTwoColour: string;
+  circleTwoEvCol: string;
+  circleThreeTitle: string;
+  circleThreeColour: string;
+  circleThreeEvCol: string;
+  circelFourTitle: string;
+  circleFourColour: string;
+  circleFourEvCol: string;
 }
 
 export interface IDonutWheelProps {
   collectionData: string | number | any;
-  eventListData: string | number | any;
+  selectedCategory: any;
+  circelOneTitle: string;
+  circleOneColour: string;
+  circleOneEvCol: string;
+  circleTwoTitle: string;
+  circleTwoColour: string;
+  circleTwoEvCol: string;
+  circleThreeTitle: string;
+  circleThreeColour: string;
+  circleThreeEvCol: string;
+  circelFourTitle: string;
+  circleFourColour: string;
+  circleFourEvCol: string;
 }
 
 export interface IDonutModalProps {
@@ -47,10 +71,39 @@ export interface IDonutWebPartProps {
   description: string;
   categoryOption: string;
   collectionData: any;
-  eventListData: any;
   colour: string;
+  eventListData: any;
+  selectedCategory: any;
+  circelOneTitle: string;
+  circleOneColour: string;
+  circleOneEvCol: string;
+  circleTwoTitle: string;
+  circleTwoColour: string;
+  circleTwoEvCol: string;
+  circleThreeTitle: string;
+  circleThreeColour: string;
+  circleThreeEvCol: string;
+  circelFourTitle: string;
+  circleFourColour: string;
+  circleFourEvCol: string;
 }
 
 export interface IPropertyControlsTestWebPartProps {
   colour: string;
+}
+
+export interface INewEvent {
+  title: string;
+  description: string;
+  category: string;
+  startDate: string;
+  dueDate: string;
+}
+
+export interface IEditEvent {
+  Title: string;
+  Description: string;
+  Category: string;
+  StartDate: string;
+  DueDate: string;
 }

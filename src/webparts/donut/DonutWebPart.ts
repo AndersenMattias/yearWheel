@@ -1,43 +1,57 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
-import { v4 as uuid } from 'uuid';
-
 import { Version } from '@microsoft/sp-core-library';
 
-import {
-  BaseClientSideWebPart,
-  IPropertyPaneConfiguration,
-} from '@microsoft/sp-webpart-base';
+import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 
 import * as strings from 'DonutWebPartStrings';
 
 import Donut from './components/Donut';
 
 import {
-  PropertyFieldCollectionData,
-  CustomCollectionFieldType,
-} from '@pnp/spfx-property-controls/lib/PropertyFieldCollectionData';
-
-import {
-  DateTimePicker,
-  DateConvention,
-  TimeConvention,
-} from '@pnp/spfx-controls-react/lib/DateTimePicker';
-
-import {
   IDonutProps,
   IDonutWebPartProps,
 } from './components/interfaces/IDonut';
+
+import '@pnp/sp/webs';
+import '@pnp/sp/lists';
+import '@pnp/sp/items';
+import {
+  IPropertyPaneConfiguration,
+  IPropertyPaneField,
+  IPropertyPaneGroup,
+  PropertyPaneButton,
+  PropertyPaneButtonType,
+  PropertyPaneDropdown,
+  PropertyPaneTextField,
+} from '@microsoft/sp-property-pane';
+
+import {
+  PropertyFieldColorPicker,
+  PropertyFieldColorPickerStyle,
+} from '@pnp/spfx-property-controls/lib/PropertyFieldColorPicker';
 
 export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartProps> {
   public render(): void {
     const element: React.ReactElement<IDonutProps> = React.createElement(
       Donut,
       {
-        description: this.properties.description,
         colour: this.properties.colour,
         collectionData: this.properties.collectionData,
         eventListData: this.properties.eventListData,
+        selectedCategory: this.properties.selectedCategory,
+        circelOneTitle: this.properties.circelOneTitle,
+        circleOneEvCol: this.properties.circleOneEvCol,
+        circleOneColour: this.properties.circleOneColour,
+        circleTwoColour: this.properties.circleTwoColour,
+        circleTwoTitle: this.properties.circleTwoTitle,
+        circleThreeTitle: this.properties.circleThreeTitle,
+        circleTwoEvCol: this.properties.circleTwoEvCol,
+        circleThreeEvCol: this.properties.circleThreeEvCol,
+        circleThreeColour: this.properties.circleThreeColour,
+        circleFourColour: this.properties.circleFourColour,
+        circelFourTitle: this.properties.circelFourTitle,
+        circleFourEvCol: this.properties.circleFourEvCol,
       }
     );
 
@@ -52,197 +66,94 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
   //   return Version.parse('1.0');
   // }
 
+  private handleClick = () => {};
+
+  onPropertyPaneFieldChanged() {}
+
+  // protected get disableReactivePropertyChanges(): boolean {
+  //   console.log("disableReactivePropertyChanges")
+  //   return false;
+  // }
+
+  private displaySettings(): IPropertyPaneGroup {
+    let groupFields: Array<IPropertyPaneField<any>> = new Array<
+      IPropertyPaneField<any>
+    >();
+    let group: IPropertyPaneGroup = {
+      groupName: 'Inställningar',
+      groupFields: groupFields,
+      isCollapsed: false,
+    };
+
+    if (this.properties.selectedCategory) {
+      let circleTitle: IPropertyPaneField<any> = PropertyPaneTextField(
+        this.properties.selectedCategory + 'Title',
+        {
+          label: 'Kategorinamn',
+          value:
+            this.properties.selectedCategory == 'circleOne' ? 'Generell' : '',
+          disabled: this.properties.selectedCategory == 'circleOne',
+        }
+      );
+      let circleColour: IPropertyPaneField<any> = PropertyPaneTextField(
+        this.properties.selectedCategory + 'Colour',
+        {
+          label: 'Välj färg',
+        }
+      );
+
+      let circleEvColour: IPropertyPaneField<any> = PropertyPaneTextField(
+        this.properties.selectedCategory + 'EvCol',
+        {
+          label: 'Välj färg för event',
+        }
+      );
+
+      groupFields.push(circleTitle);
+      groupFields.push(circleColour);
+      groupFields.push(circleEvColour);
+    }
+
+    return group;
+  }
+
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {
       pages: [
         {
           header: {
-            description: strings.PropertyPaneDescription,
+            description: '',
           },
           groups: [
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyFieldCollectionData('collectionData', {
-                  key: 'collectionData',
-                  label: 'Collection data',
-                  panelHeader: 'Collection data panel header',
-                  manageBtnLabel: 'Inställningar',
-                  value: this.properties.collectionData,
-                  fields: [
-                    {
-                      id: 'categoryName',
-                      title: 'Kategori namn',
-                      type: CustomCollectionFieldType.string,
-                    },
-                    {
-                      id: 'choosenCategory',
-                      title: 'Välj kategori',
-                      type: CustomCollectionFieldType.dropdown,
-                      options: [
-                        {
-                          key: 'Generell',
-                          text: 'Generell',
-                        },
-                        {
-                          key: 'Kategori 1',
-                          text: 'Cirkel två - Kategori 1',
-                        },
-                        {
-                          key: 'Kategori 2',
-                          text: 'Cirkel tre - Kategori 2',
-                        },
-                        {
-                          key: 'Kategori 3',
-                          text: 'Cirkel fyra - Kategori 3',
-                        },
-                      ],
-                      required: true,
-                    },
-                    {
-                      id: 'Colour',
-                      title: 'Färg',
-                      type: CustomCollectionFieldType.string,
-                    },
-                    {
-                      id: 'eventColour',
-                      title: 'Välj färg för inlagda event',
-                      type: CustomCollectionFieldType.string,
-                    },
+                PropertyPaneDropdown('selectedCategory', {
+                  label: 'Kategori',
+                  options: [
+                    { key: 'circleOne', text: 'Cirkel 1' },
+                    { key: 'circleTwo', text: 'Cirkel 2' },
+                    { key: 'circleThree', text: 'Cirkel 3' },
+                    { key: 'circleFour', text: 'Cirkel 4' },
                   ],
                 }),
 
-                PropertyFieldCollectionData('eventListData', {
-                  key: 'collectionDataFieldId',
-                  label: '',
-                  panelHeader: 'Eventlista',
-                  manageBtnLabel: 'Lägg till event',
-                  value: this.properties.eventListData,
-                  fields: [
-                    {
-                      id: 'eventId',
-                      title: 'Id',
-                      type: CustomCollectionFieldType.custom,
-                      onCustomRender: (
-                        field,
-                        value,
-                        onUpdate,
-                        item,
-                        itemId,
-                        onError
-                      ) => {
-                        return React.createElement('input', {
-                          key: itemId,
-                          value: uuid(),
-                          onChange: (
-                            event: React.FormEvent<HTMLInputElement>
-                          ) => {
-                            onUpdate(field.id, event.currentTarget.value);
-                          },
-
-                          disabled: true,
-                        });
-                      },
-                    },
-                    {
-                      id: 'eventTitle',
-                      title: 'Titel',
-                      type: CustomCollectionFieldType.string,
-                    },
-                    {
-                      id: 'selectedCategory',
-                      title: 'Välj kategori',
-                      type: CustomCollectionFieldType.dropdown,
-                      options: [
-                        {
-                          key: 'Generell',
-                          text: 'Generell',
-                        },
-                        {
-                          key: 'Kategori 1',
-                          text: 'Cirkel två',
-                        },
-                        {
-                          key: 'Kategori 2',
-                          text: 'Cirkel tre',
-                        },
-                        {
-                          key: 'Kategori 3',
-                          text: 'Cirkel fyra',
-                        },
-                      ],
-                      required: true,
-                    },
-                    {
-                      id: 'eventDescription',
-                      title: 'Beskrivning',
-                      type: CustomCollectionFieldType.string,
-                    },
-                    // {
-                    //   id: 'categoryColour',
-                    //   title: 'Färg för cirkeln',
-                    //   type: CustomCollectionFieldType.string,
-                    // },
-                    {
-                      id: 'eventColour',
-                      title: 'Välj färg för event',
-                      type: CustomCollectionFieldType.string,
-                    },
-                    {
-                      id: 'startDate',
-                      title: 'Startdatum',
-                      type: CustomCollectionFieldType.custom,
-                      required: false,
-                      onCustomRender: (
-                        field,
-                        value,
-                        onUpdate,
-                        item,
-                        itemId
-                      ) => {
-                        return React.createElement(DateTimePicker, {
-                          key: itemId,
-                          showLabels: false,
-                          dateConvention: DateConvention.Date,
-                          showGoToToday: true,
-                          showMonthPickerAsOverlay: true,
-                          value: value ? new Date(value) : null,
-                          onChange: (date: Date) => {
-                            onUpdate(field.id, date);
-                          },
-                        });
-                      },
-                    },
-                    {
-                      id: 'endDate',
-                      title: 'Slutdatum',
-                      type: CustomCollectionFieldType.custom,
-                      required: false,
-                      onCustomRender: (
-                        field,
-                        value,
-                        onUpdate,
-                        item,
-                        itemId
-                      ) => {
-                        return React.createElement(DateTimePicker, {
-                          key: itemId,
-                          showLabels: false,
-                          dateConvention: DateConvention.Date,
-                          showGoToToday: true,
-                          showMonthPickerAsOverlay: true,
-                          value: value ? new Date(value) : null,
-                          onChange: (date: Date) => {
-                            onUpdate(field.id, date);
-                          },
-                        });
-                      },
-                    },
-                  ],
+                PropertyFieldColorPicker('color', {
+                  label: 'Color',
+                  selectedColor: this.properties.colour,
+                  onPropertyChange: this.onPropertyPaneFieldChanged,
+                  properties: this.properties,
                   disabled: false,
+                  debounce: 1000,
+                  isHidden: false,
+                  alphaSliderHidden: false,
+                  style: PropertyFieldColorPickerStyle.Full,
+                  iconName: 'Precipitation',
+                  key: 'colorFieldId',
                 }),
               ],
             },
+            this.displaySettings(),
           ],
         },
       ],

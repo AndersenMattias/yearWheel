@@ -23,22 +23,34 @@ import {
   populateDateLabels,
   populateCategoryLabels,
   drawArcCircles,
-  addToList,
 } from './DonutHandler';
 
-import { IDonutWheelProps, IListEvent, IListObj } from './interfaces/IDonut';
+import { IDonutWheelProps, IListObj } from './interfaces/IDonut';
 
 import { DonutModal } from './DonutModal';
 
 import { sp } from '@pnp/sp';
-import { IItemAddResult } from '@pnp/sp/items';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
+import AddEventModal from './AddEventModal/AddEventModal';
+import HandleEventModal from './HandleEventModal/HandleEventModal';
 
 const DonutWheel = ({
   collectionData,
-  eventListData,
+  selectedCategory,
+  circelOneTitle,
+  circleOneColour,
+  circleOneEvCol,
+  circleTwoTitle,
+  circleTwoColour,
+  circleTwoEvCol,
+  circleThreeTitle,
+  circleThreeColour,
+  circleThreeEvCol,
+  circelFourTitle,
+  circleFourColour,
+  circleFourEvCol,
 }: IDonutWheelProps): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showDiv, setShowDiv] = useState<boolean>(false);
@@ -69,78 +81,16 @@ const DonutWheel = ({
       const items: any[] = await sp.web.lists
         .getByTitle('EventPlanner')
         .items.get();
+
       setItems(items);
     };
 
     fetchList();
   }, []);
 
-  // useEffect(() => {
-  //   const addToList = async (
-  //     title,
-  //     description,
-  //     category,
-  //     startDate,
-  //     endDate
-  //   ) => {
-  //     const iar: IItemAddResult = await sp.web.lists
-  //       .getByTitle('EventPlanner')
-  //       .items.add({
-  //         Title: title.eventTitle,
-  //         Description: description.eventDescription,
-  //         Category: category.selectedCategory,
-  //         StartDate: startDate.startDate,
-  //         DueDate: endDate.endDate,
-  //       });
-  //     return iar;
-  //   };
-
-  // eventListData.forEach((item) => {
-  //   console.log(item);
-  //   let alreadyInList = items.find((x) => x.uniqueId == item.uniqueId);
-  //   if (!alreadyInList) {
-  //     console.log('lägger till');
-  //     // addToList(item, item, item, item, item);
-  //   } else {
-  //     console.log('finns redan');
-  //     return;
-  //   }
-  //   // addToList(item, item, item, item, item);
-  // });
-  // }, []);
-
-  // const addEventToList = async (listItem) => {
-  //   const iar: IItemAddResult = await sp.web.lists
-  //     .getByTitle('EventPlanner')
-  //     .items.add({
-  // Title: listItem.eventTitle,
-  // Description: listItem.eventDescription,
-  // Category: listItem.selectedCategory,
-  // StartDate: listItem.startDate,
-  // DueDate: listItem.endDate,
-  //     });
-  //   return iar;
-  // };
-
-  eventListData.forEach((item) => {
-    // console.log('item', item);
-    // console.log('items', items);
-    let alreadyInList = items.find((x) => x.uniqueId == item.uniqueId);
-    if (!alreadyInList) {
-      // addToList(item, item, item, item, item);
-      console.log('lägger till');
-    } else {
-      console.log('finns redan');
-      return;
-    }
-    // addToList(item, item, item, item, item);
-  });
-
   useEffect(() => {
-    console.log('eventListData', eventListData);
     if (items.length >= 1) {
-      // console.log(items);
-      const mappedItems = items.map((item) => {
+      const mappedItems = items.map((item, index) => {
         return {
           id: item.Id,
           title: item.Title,
@@ -153,19 +103,38 @@ const DonutWheel = ({
         };
       });
 
-      // loop over data from input in "collectionpanel"
-      // create one circle for each category
-      collectionData.forEach((data, index) => {
-        if (index == 0) {
-          addWheeldata(wheelData, 405, 470, data, data, data);
-        } else if (index == 1) {
-          addWheeldata(wheelData, 390, 317, data, data, data);
-        } else if (index == 2) {
-          addWheeldata(wheelData, 300, 240, data, data, data);
-        } else if (index == 3) {
-          addWheeldata(wheelData, 224, 154, data, data, data);
-        }
-      });
+      addWheeldata(
+        wheelData,
+        405,
+        470,
+        circleOneColour,
+        'Generell',
+        circleOneEvCol
+      );
+      addWheeldata(
+        wheelData,
+        390,
+        317,
+        circleTwoColour,
+        'Kategori 1',
+        circleTwoEvCol
+      );
+      addWheeldata(
+        wheelData,
+        300,
+        240,
+        circleThreeColour,
+        'Kategori 2',
+        circleThreeEvCol
+      );
+      addWheeldata(
+        wheelData,
+        224,
+        154,
+        circleFourColour,
+        'Kategori 3',
+        circleFourEvCol
+      );
 
       //  create arc for each circle
       drawArcCircles(wheelData, svgEl);
@@ -177,6 +146,18 @@ const DonutWheel = ({
         const textArc = d3.arc();
         const start = getDegreeFromDay(item.startDay) * (Math.PI / 180);
         const end = getDegreeFromDay(item.endDay) * (Math.PI / 180);
+
+        let eventColour;
+
+        if (wheel.category === 'Generell') {
+          eventColour = circleOneEvCol;
+        } else if (wheel.category === 'Kategori 1') {
+          eventColour = circleTwoEvCol;
+        } else if (wheel.category === 'Kategori 2') {
+          eventColour = circleThreeEvCol;
+        } else if (wheel.category === 'Kategori 3') {
+          eventColour = circleFourEvCol;
+        }
 
         return {
           arcSvg: arc({
@@ -197,8 +178,8 @@ const DonutWheel = ({
             startAngle: start,
             endAngle: end,
           }),
-          // TODO: Fixa färg för event, lägger till men endast efter rerender?
-          colour: wheel.eventColour,
+
+          colour: eventColour,
           title: item.title,
           id: item.id,
         };
@@ -235,7 +216,6 @@ const DonutWheel = ({
               description: data.description,
               start: data.startDate,
               end: data.endDate,
-              location: data.location,
             });
             setIsModalOpen(true);
           });
@@ -248,7 +228,7 @@ const DonutWheel = ({
           .attr('x', event.centroid[0])
           .attr('y', event.centroid[1])
           .style('text-anchor', 'middle')
-          .style('font', "12px 'Helvetica Neue'")
+          .style('font', "14px 'Helvetica Neue'")
           .style('fill', 'black')
           // .append('textPath')
           .text(event.title)
@@ -272,17 +252,10 @@ const DonutWheel = ({
         //   .html(`<h3 >${event.title}</h3>`);
       });
     } else {
-      collectionData.forEach((data, index) => {
-        if (index == 0) {
-          addWheeldata(wheelData, 405, 470, data, 'Generell', '');
-        } else if (index == 1) {
-          addWheeldata(wheelData, 390, 317, data, 'Kategori 1', '');
-        } else if (index == 2) {
-          addWheeldata(wheelData, 300, 240, data, 'Kategori 2', '');
-        } else if (index == 3) {
-          addWheeldata(wheelData, 224, 154, data, 'Kategori 3', '');
-        }
-      });
+      addWheeldata(wheelData, 405, 470, 'yellow', 'Generell', 'red');
+      addWheeldata(wheelData, 390, 317, 'yellow', 'Kategori 1', 'red');
+      addWheeldata(wheelData, 300, 240, 'yellow', 'Kategori 2', 'red');
+      addWheeldata(wheelData, 224, 154, 'yellow', 'Kategori 3', 'red');
 
       drawArcCircles(wheelData, svgEl);
     }
@@ -296,52 +269,16 @@ const DonutWheel = ({
     populateDateLabels(datesLower, 52, 180, datesLabelLower, 482, 26);
 
     // Category one
-    populateCategoryLabels(
-      cateOneUpper,
-      6,
-      90,
-      392,
-      collectionData[0].Category || 'Kategori 1'
-    );
-    populateCategoryLabels(
-      catOneLower,
-      6,
-      270,
-      401,
-      collectionData[0].Category || 'Kategori 1'
-    );
+    populateCategoryLabels(cateOneUpper, 6, 90, 392, circleTwoTitle);
+    populateCategoryLabels(catOneLower, 6, 270, 401, circleTwoTitle);
 
     // Category Two
-    populateCategoryLabels(
-      catTwoUpper,
-      6,
-      90,
-      303,
-      collectionData[1].Category || 'Kategori 2'
-    );
-    populateCategoryLabels(
-      catTwoLower,
-      6,
-      270,
-      312,
-      collectionData[1].Category || 'Kategori 2'
-    );
+    populateCategoryLabels(catTwoUpper, 6, 90, 303, circleThreeTitle);
+    populateCategoryLabels(catTwoLower, 6, 270, 312, circleThreeTitle);
 
     // Category three
-    populateCategoryLabels(
-      catThreeUpper,
-      6,
-      90,
-      225,
-      collectionData[2].Category || 'Kategori 3'
-    );
-    populateCategoryLabels(
-      catThreeLower,
-      6,
-      270,
-      234,
-      collectionData[2].Category || 'Kategori 3'
-    );
+    populateCategoryLabels(catThreeUpper, 6, 90, 225, circelFourTitle);
+    populateCategoryLabels(catThreeLower, 6, 270, 234, circelFourTitle);
 
     // Month labels
     drawText(monthTextUpper, -105, svgEl);
@@ -374,18 +311,22 @@ const DonutWheel = ({
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center' }}>
-      {showDiv && <DivHover />}
-      {isModalOpen && (
-        <DonutModal
-          isModalOpen={isModalOpen}
-          setIsModalOpen={setIsModalOpen}
-          items={items}
-          data={dataObj}
-        />
-      )}
-      <svg viewBox='0 0 1000 1000' height='850' width='850' ref={ref}></svg>
-    </div>
+    <>
+      <HandleEventModal items={items} setItems={setItems} />
+      <AddEventModal setItems={setItems} />
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        {showDiv && <DivHover />}
+        {isModalOpen && (
+          <DonutModal
+            isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+            items={items}
+            data={dataObj}
+          />
+        )}
+        <svg viewBox='0 0 1000 1000' height='850' width='850' ref={ref}></svg>
+      </div>
+    </>
   );
 };
 

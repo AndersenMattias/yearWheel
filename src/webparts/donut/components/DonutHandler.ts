@@ -20,8 +20,11 @@ export const getDayOfYear = (date) => {
 };
 
 export const dateWithoutTime = (date) => {
-  let newDate = new Date(date).toISOString().slice(0, 10);
-  return newDate;
+  if (date.toString().indexOf('T') != -1) {
+    return new Date(date).toISOString().slice(0, 10);
+  } else {
+    return date;
+  }
 };
 
 // Calculate cartesian points in circle
@@ -53,7 +56,24 @@ export const getCentroid = (innerRadius, outerRadius, startAngle, endAngle) => {
   return [Math.cos(a) * r, Math.sin(a) * r];
 };
 
-// add data to wheelData array
+// const onUpdateEvent = async (
+//   id: number,
+//   title: string,
+//   description: string,
+//   category: string,
+//   startDate,
+//   dueDate
+// ) => {
+//   const updateEvent = await list.items.getById(id).update({
+//     Title: title,
+//     Description: description,
+//     Category: category,
+//     StartDate: startDate,
+//     DueDate: dueDate,
+//   });
+//   return updateEvent;
+// };
+
 export const addWheeldata = (
   arr,
   innerradius: number,
@@ -67,10 +87,10 @@ export const addWheeldata = (
     outerRadius: outerRadius,
     startAngle: getDegreeFromDay(0) * (Math.PI / 180),
     endAngle: getDegreeFromDay(360) * (Math.PI / 180),
-    colour: colour.Colour,
+    colour: colour,
     arcSvg: undefined,
-    category: category.pickCategory,
-    eventColour: evColour.eventColour,
+    category: category,
+    eventColour: evColour,
   });
 };
 
@@ -84,12 +104,13 @@ export const addToList = async (
   const iar: IItemAddResult = await sp.web.lists
     .getByTitle('EventPlanner')
     .items.add({
-      Title: title.eventTitle,
-      Description: description.eventDescription,
-      Category: category.selectedCategory,
-      StartDate: startDate.startDate,
-      DueDate: endDate.endDate,
+      Title: title,
+      Description: description,
+      Category: category,
+      StartDate: startDate,
+      DueDate: endDate,
     });
+
   return iar;
 };
 

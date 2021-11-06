@@ -4,23 +4,22 @@
   "alias": "DonutWebPart",
   "componentType": "WebPart",
 
-
   "version": "*",
   "manifestVersion": 2,
 
   "requiresCustomScript": false,
   "supportedHosts": ["SharePointWebPart"],
 
-  "preconfiguredEntries": [{
-    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-    "group": { "default": "Other" },
-    "title": { "default": "Donut" },
-    "description": { "default": "Donut description" },
-    "officeFabricIconFontName": "Page",
-    "properties": {
-      "description": "Donut",
-      "amountOfCircles":1,
-      "firstCircleTitle":"Generell"
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": { "default": "Other" },
+      "title": { "default": "Årshjul" },
+      "description": { "default": "Årshjul" },
+      "officeFabricIconFontName": "Page",
+      "properties": {
+        "description": "Årshjul"
+      }
     }
-  }]
+  ]
 }
