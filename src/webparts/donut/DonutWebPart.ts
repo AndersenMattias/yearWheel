@@ -20,23 +20,15 @@ import {
   IPropertyPaneConfiguration,
   IPropertyPaneField,
   IPropertyPaneGroup,
-  PropertyPaneButton,
-  PropertyPaneButtonType,
   PropertyPaneDropdown,
   PropertyPaneTextField,
 } from '@microsoft/sp-property-pane';
-
-import {
-  PropertyFieldColorPicker,
-  PropertyFieldColorPickerStyle,
-} from '@pnp/spfx-property-controls/lib/PropertyFieldColorPicker';
 
 export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartProps> {
   public render(): void {
     const element: React.ReactElement<IDonutProps> = React.createElement(
       Donut,
       {
-        colour: this.properties.colour,
         collectionData: this.properties.collectionData,
         eventListData: this.properties.eventListData,
         selectedCategory: this.properties.selectedCategory,
@@ -65,8 +57,6 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
   // protected get dataVersion(): Version {
   //   return Version.parse('1.0');
   // }
-
-  private handleClick = () => {};
 
   onPropertyPaneFieldChanged() {}
 
@@ -136,20 +126,6 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
                     { key: 'circleThree', text: 'Cirkel 3' },
                     { key: 'circleFour', text: 'Cirkel 4' },
                   ],
-                }),
-
-                PropertyFieldColorPicker('color', {
-                  label: 'Color',
-                  selectedColor: this.properties.colour,
-                  onPropertyChange: this.onPropertyPaneFieldChanged,
-                  properties: this.properties,
-                  disabled: false,
-                  debounce: 1000,
-                  isHidden: false,
-                  alphaSliderHidden: false,
-                  style: PropertyFieldColorPickerStyle.Full,
-                  iconName: 'Precipitation',
-                  key: 'colorFieldId',
                 }),
               ],
             },

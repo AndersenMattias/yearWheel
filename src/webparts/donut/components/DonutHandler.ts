@@ -56,24 +56,6 @@ export const getCentroid = (innerRadius, outerRadius, startAngle, endAngle) => {
   return [Math.cos(a) * r, Math.sin(a) * r];
 };
 
-// const onUpdateEvent = async (
-//   id: number,
-//   title: string,
-//   description: string,
-//   category: string,
-//   startDate,
-//   dueDate
-// ) => {
-//   const updateEvent = await list.items.getById(id).update({
-//     Title: title,
-//     Description: description,
-//     Category: category,
-//     StartDate: startDate,
-//     DueDate: dueDate,
-//   });
-//   return updateEvent;
-// };
-
 export const addWheeldata = (
   arr,
   innerradius: number,
@@ -112,6 +94,31 @@ export const addToList = async (
     });
 
   return iar;
+};
+
+export const onUpdateEvent = async (
+  id: number,
+  title: string,
+  description: string,
+  category: string,
+  startDate,
+  dueDate
+) => {
+  let list = sp.web.lists.getByTitle('EventPlanner');
+  const updateEvent = await list.items.getById(id).update({
+    Title: title,
+    Description: description,
+    Category: category,
+    StartDate: startDate,
+    DueDate: dueDate,
+  });
+  return updateEvent;
+};
+
+export const onDeleteEvent = async (id: number) => {
+  let list = sp.web.lists.getByTitle('EventPlanner');
+  const deleteEvent = await list.items.getById(id).delete();
+  return deleteEvent;
 };
 
 export const drawArcCircles = (arr, svg) => {

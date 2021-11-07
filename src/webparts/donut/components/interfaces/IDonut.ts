@@ -25,7 +25,6 @@ export interface IListEvent {
 }
 
 export interface IDonutProps {
-  colour: string
   collectionData: any[];
   eventListData: any;
   selectedCategory: any;
@@ -106,4 +105,14 @@ export interface IEditEvent {
   Category: string;
   StartDate: string;
   DueDate: string;
+}
+
+export interface IColorPickerControlProps {
+  label: string;
+  color: string;
+  onColorChanged: (color: string) => void;
+}
+export interface IColorPickerControlState {
+  color: string;
+  isCalloutVisible: boolean;
 }

@@ -57,11 +57,22 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
   const dropdownStyles: Partial<IDropdownStyles> = { dropdown: { width: 300 } };
 
   useEffect(() => {
-    if (input.title.length > 3 && input.description.length > 10) {
+    if (input.title.length > 3 || input.description.length > 5) {
       setShowError(false);
       setErrorMessage('');
     }
-  }, [input.title, input.description, input.startDate, input]);
+  }, [input, input.title, input.description]);
+
+  useEffect(() => {
+    if (
+      input.title ||
+      input.description ||
+      input.startDate ||
+      input.dueDate !== ''
+    ) {
+      setShowError(false);
+    }
+  }, [input.title, input.description, input.category, input.startDate]);
 
   const onHandleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -75,10 +86,11 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
     ) {
       setErrorMessage('Alla fält måste fyllas i, vänligen försök igen.');
       setShowError(true);
-    } else if (input.title.length < 3 || input.description.length < 5) {
-      setErrorMessage(
-        'Titeln måste vara längre än tre tecken och beskrivning längre än fem tecken.'
-      );
+    } else if (input.title.length < 3) {
+      setErrorMessage('Titeln måste vara längre än tre tecken.');
+      setShowError(true);
+    } else if (input.description.length < 5) {
+      setErrorMessage('Beskrivningen måste vara längre än fem tecken.');
       setShowError(true);
     } else if (
       input.title &&
@@ -104,6 +116,7 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
         );
 
         setItems((prev) => [...prev, newEvent]);
+
         input.title = '';
         input.description = '';
         input.startDate = '';
@@ -129,7 +142,7 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
   const ErrorMessage = (): JSX.Element => {
     return (
       <div>
-        <p>{errorMessage}</p>
+        <p style={{ color: 'red' }}>{errorMessage}</p>
       </div>
     );
   };

@@ -31,11 +31,9 @@ import { sp } from '@pnp/sp';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
-import { dateWithoutTime } from '../DonutHandler';
+import { dateWithoutTime, onUpdateEvent } from '../DonutHandler';
 
 export const HandleEventModal = ({ items, setItems }: any): JSX.Element => {
-  // const [isModalOpen, { setTrue: showModal, setFalse: hideModal }] =
-  //   useBoolean(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showError, setShowError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -78,22 +76,45 @@ export const HandleEventModal = ({ items, setItems }: any): JSX.Element => {
     return string;
   };
 
-  const onUpdateEvent = async (id: number) => {
-    const updateEvent = await list.items.getById(id).update({
-      Title: input.Title,
-      Description: input.Description,
-      Category: input.Category,
-      StartDate: dateJSONToEDM(input.StartDate),
-      DueDate: dateJSONToEDM(input.DueDate),
-    });
-    setItems((prev) => [...prev, updateEvent]);
-    return updateEvent;
-  };
+  // const onUpdateEvent = async (
+  //   id: number,
+  //   title,
+  //   description,
+  //   category,
+  //   startDate,
+  //   dueDate
+  // ) => {
+  //   const eventUpdated = {
+  //     Title: input.Title,
+  //     Description: input.Description,
+  //     Category: selectedCategory.text,
+  //     StartDate: input.StartDate,
+  //     DueDate: input.DueDate,
+  //   };
+  //   const updateEvent = await list.items.getById(id).update({
+  //     Title: title,
+  //     Description: description,
+  //     Category: category,
+  //     StartDate: dateJSONToEDM(startDate),
+  //     DueDate: dateJSONToEDM(dueDate),
+  //   });
+  //   setItems((prev) => [...prev, updateEvent]);
+  //   // return updateEvent;
+  // };
 
   const titleId = useId('title');
 
   const onHandleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // console.log(
+    //   input.Title,
+    //   selectedCategory.text,
+    //   input.Description,
+    //   input.Category,
+    //   input.StartDate,
+    //   input.DueDate
+    // );
   };
 
   const onChange = (
@@ -105,7 +126,7 @@ export const HandleEventModal = ({ items, setItems }: any): JSX.Element => {
 
   const mappedItems = items.map((item) => {
     return (
-      <>
+      <form onSubmit={onHandleSubmit}>
         <TextField
           label='Titel'
           type='text'
@@ -131,7 +152,7 @@ export const HandleEventModal = ({ items, setItems }: any): JSX.Element => {
           selectedKey={input.Category ? input.Category : undefined}
           // eslint-disable-next-line react/jsx-no-bind
           onChange={onChange}
-          placeholder='Välj kategori'
+          placeholder={item.Category}
           options={categoryOptions}
           styles={dropdownStyles}
         />
@@ -155,10 +176,22 @@ export const HandleEventModal = ({ items, setItems }: any): JSX.Element => {
         <DefaultButton onClick={() => onDeleteEvent(item.Id)}>
           Radera
         </DefaultButton>
-        <DefaultButton type='submit' onClick={() => onUpdateEvent(item.Id)}>
+        <DefaultButton
+        // type='submit'
+        // // onClick={() =>
+        // //   onUpdateEvent(
+        // //     item.Id,
+        // //     item.Title,
+        // //     item.Description,
+        // //     item.Category,
+        // //     item.Startdate,
+        // //     item.DueDate
+        // //   )
+        // // }
+        >
           Spara
         </DefaultButton>
-      </>
+      </form>
     );
   });
 
@@ -184,9 +217,7 @@ export const HandleEventModal = ({ items, setItems }: any): JSX.Element => {
             onClick={() => setIsModalOpen(false)}
           />
         </div>
-        <div className={contentStyles.body}>
-          <form onSubmit={onHandleSubmit}>{mappedItems}</form>
-        </div>
+        <div className={contentStyles.body}>{mappedItems}</div>
       </Modal>
     </div>
   );

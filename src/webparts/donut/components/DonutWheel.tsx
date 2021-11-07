@@ -60,7 +60,6 @@ const DonutWheel = ({
   const [dataObj, setDataObj] = useState<IListObj>({});
 
   const ref = useRef();
-
   const svgEl = d3.select(ref.current);
 
   let monthTextUpper = [];
@@ -251,54 +250,94 @@ const DonutWheel = ({
         //   .style('font', "12px 'Helvetica Neue'")
         //   .html(`<h3 >${event.title}</h3>`);
       });
-    } else {
-      addWheeldata(wheelData, 405, 470, 'yellow', 'Generell', 'red');
-      addWheeldata(wheelData, 390, 317, 'yellow', 'Kategori 1', 'red');
-      addWheeldata(wheelData, 300, 240, 'yellow', 'Kategori 2', 'red');
-      addWheeldata(wheelData, 224, 154, 'yellow', 'Kategori 3', 'red');
+      // Populate array with data - months
+      populateMonthLabels(monthTextUpper, 24, 180, monthsLabelUpper, 488, 11);
+      populateMonthLabels(monthTextLower, 24, 0, monthsLabelLower, 497, 11);
 
-      drawArcCircles(wheelData, svgEl);
+      // Populate array with data - days
+      populateDateLabels(datesUpper, 52, 0, datesLabelUpper, 473, 26);
+      populateDateLabels(datesLower, 52, 180, datesLabelLower, 482, 26);
+
+      // Category one
+      populateCategoryLabels(cateOneUpper, 6, 90, 392, circleTwoTitle);
+      populateCategoryLabels(catOneLower, 6, 270, 401, circleTwoTitle);
+
+      // Category Two
+      populateCategoryLabels(catTwoUpper, 6, 90, 303, circleThreeTitle);
+      populateCategoryLabels(catTwoLower, 6, 270, 312, circleThreeTitle);
+
+      // Category three
+      populateCategoryLabels(catThreeUpper, 6, 90, 225, circelFourTitle);
+      populateCategoryLabels(catThreeLower, 6, 270, 234, circelFourTitle);
+
+      // Month labels
+      drawText(monthTextUpper, -105, svgEl);
+      drawText(monthTextLower, -105, svgEl);
+
+      // Date labels
+      drawText(datesUpper, 90, svgEl);
+      drawText(datesLower, 90, svgEl);
+
+      // first category
+      drawText(cateOneUpper, 180, svgEl);
+      drawText(catOneLower, 180, svgEl);
+
+      // second category
+      drawText(catTwoUpper, 180, svgEl);
+      drawText(catTwoLower, 180, svgEl);
+
+      // third category
+      drawText(catThreeUpper, 180, svgEl);
+      drawText(catThreeLower, 180, svgEl);
     }
+    // } else {
+    //   // Populate array with data - months
+    //   populateMonthLabels(monthTextUpper, 24, 180, monthsLabelUpper, 488, 11);
+    //   populateMonthLabels(monthTextLower, 24, 0, monthsLabelLower, 497, 11);
 
-    // Populate array with data - months
-    populateMonthLabels(monthTextUpper, 24, 180, monthsLabelUpper, 488, 11);
-    populateMonthLabels(monthTextLower, 24, 0, monthsLabelLower, 497, 11);
+    //   // Populate array with data - days
+    //   populateDateLabels(datesUpper, 52, 0, datesLabelUpper, 473, 26);
+    //   populateDateLabels(datesLower, 52, 180, datesLabelLower, 482, 26);
 
-    // Populate array with data - days
-    populateDateLabels(datesUpper, 52, 0, datesLabelUpper, 473, 26);
-    populateDateLabels(datesLower, 52, 180, datesLabelLower, 482, 26);
+    //   // Category one
+    //   populateCategoryLabels(cateOneUpper, 6, 90, 392, 'Kategori 1');
+    //   populateCategoryLabels(catOneLower, 6, 270, 401, 'Kategori 1');
 
-    // Category one
-    populateCategoryLabels(cateOneUpper, 6, 90, 392, circleTwoTitle);
-    populateCategoryLabels(catOneLower, 6, 270, 401, circleTwoTitle);
+    //   // Category Two
+    //   populateCategoryLabels(catTwoUpper, 6, 90, 303, 'Kategori 2');
+    //   populateCategoryLabels(catTwoLower, 6, 270, 312, 'Kategori 2');
 
-    // Category Two
-    populateCategoryLabels(catTwoUpper, 6, 90, 303, circleThreeTitle);
-    populateCategoryLabels(catTwoLower, 6, 270, 312, circleThreeTitle);
+    //   // Category three
+    //   populateCategoryLabels(catThreeUpper, 6, 90, 225, 'Kategori 3');
+    //   populateCategoryLabels(catThreeLower, 6, 270, 234, 'Kategori 3');
 
-    // Category three
-    populateCategoryLabels(catThreeUpper, 6, 90, 225, circelFourTitle);
-    populateCategoryLabels(catThreeLower, 6, 270, 234, circelFourTitle);
+    //   // Month labels
+    //   drawText(monthTextUpper, -105, svgEl);
+    //   drawText(monthTextLower, -105, svgEl);
 
-    // Month labels
-    drawText(monthTextUpper, -105, svgEl);
-    drawText(monthTextLower, -105, svgEl);
+    //   // Date labels
+    //   drawText(datesUpper, 90, svgEl);
+    //   drawText(datesLower, 90, svgEl);
 
-    // Date labels
-    drawText(datesUpper, 90, svgEl);
-    drawText(datesLower, 90, svgEl);
+    //   // first category
+    //   drawText(cateOneUpper, 180, svgEl);
+    //   drawText(catOneLower, 180, svgEl);
 
-    // first category
-    drawText(cateOneUpper, 180, svgEl);
-    drawText(catOneLower, 180, svgEl);
+    //   // second category
+    //   drawText(catTwoUpper, 180, svgEl);
+    //   drawText(catTwoLower, 180, svgEl);
 
-    // second category
-    drawText(catTwoUpper, 180, svgEl);
-    drawText(catTwoLower, 180, svgEl);
+    //   // third category
+    //   drawText(catThreeUpper, 180, svgEl);
+    //   drawText(catThreeLower, 180, svgEl);
 
-    // third category
-    drawText(catThreeUpper, 180, svgEl);
-    drawText(catThreeLower, 180, svgEl);
+    //   addWheeldata(wheelData, 405, 470, 'yellow', 'Generell', 'red');
+    //   addWheeldata(wheelData, 390, 317, 'yellow', 'Kategori 1', 'red');
+    //   addWheeldata(wheelData, 300, 240, 'yellow', 'Kategori 2', 'red');
+    //   addWheeldata(wheelData, 224, 154, 'yellow', 'Kategori 3', 'red');
+
+    //   drawArcCircles(wheelData, svgEl);
+    // }
   }, [items]);
 
   const DivHover = (): JSX.Element => {
