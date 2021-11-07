@@ -145,9 +145,11 @@ export const drawArcCircles = (arr, svg) => {
   );
 };
 
-export const drawText = (arr: any[], rotate: number, svgEl) => {
+export const drawText = (arr: any[], rotate: number, name: string, svgEl) => {
   arr.forEach((coord, index) => {
     svgEl
+      .append('g')
+      .attr('class', name)
       .append('text')
       .attr('x', coord.coords.x)
       .attr('y', coord.coords.y)
@@ -163,6 +165,27 @@ export const drawText = (arr: any[], rotate: number, svgEl) => {
         }, ${coord.coords.y})`
       );
   });
+};
+
+export const appendArcText = (svgEl, positionX, positionY, title: string) => {
+  svgEl
+    .selectAll('#pathGroup')
+    // .append('g')
+    // .attr('id', 'textGroup')
+    .append('text')
+    .attr('id', 'arcText')
+
+    .attr('x', positionX)
+    .attr('y', positionY)
+    .style('text-anchor', 'middle')
+    .style('font', "14px 'Helvetica Neue'")
+    .style('fill', 'black')
+    // // .append('textPath')
+    .text(title)
+    .attr('transform', 'translate(500,500)');
+  // .attr('xlink:href', (d, i, j) => {
+  //   return '#arc-label' + event.id;
+  // });
 };
 
 export const populateMonthLabels = (

@@ -23,6 +23,7 @@ import {
   populateDateLabels,
   populateCategoryLabels,
   drawArcCircles,
+  appendArcText,
 } from './DonutHandler';
 
 import { IDonutWheelProps, IListObj } from './interfaces/IDonut';
@@ -184,24 +185,28 @@ const DonutWheel = ({
         };
       });
 
-      mappedArcs.forEach((event) => {
-        let data = mappedItems.find((d) => d.id == event.id);
+      console.log(items);
 
-        let pathGroup = svgEl
+      mappedArcs.forEach((event, index) => {
+        let data = mappedItems.find((d) => d.id == event.id);
+        console.log(data);
+
+        svgEl
           .append('g')
           .attr('id', 'pathGroup')
           .append('path')
           .attr('id', (i) => {
-            return '#arc-label' + event.id;
+            return '#arc-label' + data.id;
           })
           .attr('d', event.arcSvg)
           .style('fill', event.colour)
           .attr('transform', 'translate(500,500)');
 
-        pathGroup
+        svgEl
+          .selectAll('#pathGroup')
           .style('cursor', 'pointer')
           .on('mouseover', (e) => {
-            setTextValue(event.title);
+            setTextValue(data.title);
             setDateValue(data.startDate + ' - ' + data.endDate);
             setShowDiv(true);
           })
@@ -219,17 +224,22 @@ const DonutWheel = ({
             setIsModalOpen(true);
           });
 
+        // TODO:
+        // forEach gör så att det ökar med en text för grupp?
+        // Fler text fält renderas för varje "PathGroup"
         svgEl
-          .selectAll('g')
+          .selectAll('#pathGroup')
+          // .append('g')
           // .attr('id', 'textGroup')
-          .append('g')
           .append('text')
+          .attr('id', 'arcText')
+
           .attr('x', event.centroid[0])
           .attr('y', event.centroid[1])
           .style('text-anchor', 'middle')
           .style('font', "14px 'Helvetica Neue'")
           .style('fill', 'black')
-          // .append('textPath')
+          // // .append('textPath')
           .text(event.title)
           .attr('transform', 'translate(500,500)');
         // .attr('xlink:href', (d, i, j) => {
@@ -250,6 +260,7 @@ const DonutWheel = ({
         //   .style('font', "12px 'Helvetica Neue'")
         //   .html(`<h3 >${event.title}</h3>`);
       });
+
       // Populate array with data - months
       populateMonthLabels(monthTextUpper, 24, 180, monthsLabelUpper, 488, 11);
       populateMonthLabels(monthTextLower, 24, 0, monthsLabelLower, 497, 11);
@@ -271,24 +282,24 @@ const DonutWheel = ({
       populateCategoryLabels(catThreeLower, 6, 270, 234, circelFourTitle);
 
       // Month labels
-      drawText(monthTextUpper, -105, svgEl);
-      drawText(monthTextLower, -105, svgEl);
+      drawText(monthTextUpper, -105, 'monthUpper', svgEl);
+      drawText(monthTextLower, -105, 'monthLower', svgEl);
 
       // Date labels
-      drawText(datesUpper, 90, svgEl);
-      drawText(datesLower, 90, svgEl);
+      drawText(datesUpper, 90, 'dateUpper', svgEl);
+      drawText(datesLower, 90, 'dateLower', svgEl);
 
       // first category
-      drawText(cateOneUpper, 180, svgEl);
-      drawText(catOneLower, 180, svgEl);
+      drawText(cateOneUpper, 180, 'firstCatUpper', svgEl);
+      drawText(catOneLower, 180, 'firstCatLower', svgEl);
 
       // second category
-      drawText(catTwoUpper, 180, svgEl);
-      drawText(catTwoLower, 180, svgEl);
+      drawText(catTwoUpper, 180, 'secondCatUpper', svgEl);
+      drawText(catTwoLower, 180, 'secondCatLower', svgEl);
 
       // third category
-      drawText(catThreeUpper, 180, svgEl);
-      drawText(catThreeLower, 180, svgEl);
+      drawText(catThreeUpper, 180, 'thirdCatUpper', svgEl);
+      drawText(catThreeLower, 180, 'thirdCatLower', svgEl);
     }
     // } else {
     //   // Populate array with data - months
