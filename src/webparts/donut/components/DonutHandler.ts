@@ -4,6 +4,7 @@ import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
 import * as d3 from 'd3';
+import { v4 as uuid } from 'uuid';
 
 export const getDegreeFromDay = (dayOfYear) => (365 / 360) * dayOfYear;
 
@@ -54,6 +55,38 @@ export const getCentroid = (innerRadius, outerRadius, startAngle, endAngle) => {
   const a = (+startAngle + +endAngle) / 2 - Math.PI / 2;
 
   return [Math.cos(a) * r, Math.sin(a) * r];
+};
+
+export const createDonutCircle = (
+  arr,
+  innerRadius: number,
+  outerRadius: number,
+  arcInner: number,
+  arcOuter: number,
+  start: number,
+  end: number,
+  colour: string,
+  category?: string,
+  title?: string,
+  evColour?: string
+) => {
+  const arc = d3.arc();
+  let id = uuid();
+  return arr.push({
+    arcSvg: arc({
+      innerRadius: innerRadius,
+      outerRadius: outerRadius,
+      startAngle: start * (Math.PI / 180),
+      endAngle: end * (Math.PI / 180),
+    }),
+    innerRad: arcInner,
+    outerRad: arcOuter,
+    category: category,
+    colour: colour,
+    title: title,
+    eventColour: evColour,
+    id: id,
+  });
 };
 
 export const addWheeldata = (
@@ -150,6 +183,7 @@ export const drawText = (arr: any[], rotate: number, name: string, svgEl) => {
     svgEl
       .append('g')
       .attr('class', name)
+      .append('g')
       .append('text')
       .attr('x', coord.coords.x)
       .attr('y', coord.coords.y)
@@ -165,27 +199,6 @@ export const drawText = (arr: any[], rotate: number, name: string, svgEl) => {
         }, ${coord.coords.y})`
       );
   });
-};
-
-export const appendArcText = (svgEl, positionX, positionY, title: string) => {
-  svgEl
-    .selectAll('#pathGroup')
-    // .append('g')
-    // .attr('id', 'textGroup')
-    .append('text')
-    .attr('id', 'arcText')
-
-    .attr('x', positionX)
-    .attr('y', positionY)
-    .style('text-anchor', 'middle')
-    .style('font', "14px 'Helvetica Neue'")
-    .style('fill', 'black')
-    // // .append('textPath')
-    .text(title)
-    .attr('transform', 'translate(500,500)');
-  // .attr('xlink:href', (d, i, j) => {
-  //   return '#arc-label' + event.id;
-  // });
 };
 
 export const populateMonthLabels = (
@@ -210,6 +223,7 @@ export const populateMonthLabels = (
     }
   }
 };
+
 export const populateDateLabels = (
   arr,
   divider: number,

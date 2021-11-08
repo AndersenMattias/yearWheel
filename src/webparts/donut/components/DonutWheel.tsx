@@ -9,11 +9,10 @@ import {
   datesLabelLower,
   monthsLabelUpper,
   monthsLabelLower,
-  wheelData,
+  donutWheelData,
 } from './DonutWheelData';
 
 import {
-  addWheeldata,
   drawText,
   getDayOfYear,
   getCentroid,
@@ -21,9 +20,7 @@ import {
   dateWithoutTime,
   populateMonthLabels,
   populateDateLabels,
-  populateCategoryLabels,
-  drawArcCircles,
-  appendArcText,
+  createDonutCircle,
 } from './DonutHandler';
 
 import { IDonutWheelProps, IListObj } from './interfaces/IDonut';
@@ -69,12 +66,8 @@ const DonutWheel = ({
   let datesUpper = [];
   let datesLower = [];
 
-  let cateOneUpper = [];
-  let catOneLower = [];
-  let catTwoUpper = [];
-  let catTwoLower = [];
-  let catThreeUpper = [];
-  let catThreeLower = [];
+  let labelsforCircle = [];
+  let circlesForDonut = [];
 
   useEffect(() => {
     const fetchList = async () => {
@@ -87,6 +80,76 @@ const DonutWheel = ({
 
     fetchList();
   }, []);
+
+  useEffect(() => {
+    // prevents duplicate elements onload / rerender
+    svgEl.selectAll('*').remove();
+
+    // creates black "circles" for months and dates
+    createDonutCircle(labelsforCircle, 499, 500, 499, 500, 0, 360, '#000');
+    createDonutCircle(labelsforCircle, 485, 486, 485, 486, 0, 360, '#000');
+
+    labelsforCircle.forEach((circle) => {
+      svgEl
+        .append('g')
+        .attr('id', `wheelRingLabels${circle.id}`)
+        .append('path')
+        .attr('d', circle.arcSvg)
+        .attr('id', `wheelRingLabelsArc${circle.id}`)
+        .attr('transform', 'translate(500,500)')
+        .style('fill', circle.colour);
+    });
+
+    donutWheelData.forEach((circle, index) => {
+      let circleColour;
+      let circleTitle;
+
+      if (circle.category === 'Generell') {
+        circleColour = circleOneColour;
+        circleTitle = circelOneTitle;
+      } else if (circle.category === 'Kategori 1') {
+        circleColour = circleTwoColour;
+        circleTitle = circleTwoTitle;
+      } else if (circle.category === 'Kategori 2') {
+        circleColour = circleThreeColour;
+        circleTitle = circleThreeTitle;
+      } else if (circle.category === 'Kategori 3') {
+        circleColour = circleFourColour;
+        circleTitle = circelFourTitle;
+      }
+
+      svgEl
+        .append('g')
+        .attr('id', `wheelRing${circle.id}`)
+        .append('path')
+        .attr('d', circle.arcSvg)
+        .attr('id', `wheelRingElement${index}`)
+        .attr('transform', 'translate(500,500)')
+        .style('fill', circleColour);
+
+      let text = svgEl
+        .selectAll(`#wheelRing${circle.id}`)
+        .append('g')
+        .attr('id', 'wheelRingText')
+        .append('text')
+        // .style('font', "14px 'Rubik")
+        // .style('fill', 'black')
+        // .attr('text-anchor', 'center')
+        .attr('x', 10)
+        .attr('dy', -2);
+
+      text
+        .append('textPath')
+        .attr('startOffset', '17%')
+        // .attr('font-size', '14px')
+        // .style('stroke', 'white')
+        // .style('stroke-width', 1)
+        // .style('colour', 'black')
+        .attr('font-family', 'sans-serif')
+        .attr('xlink:href', `#wheelRingElement${index}`)
+        .text(circleTitle);
+    });
+  });
 
   useEffect(() => {
     if (items.length >= 1) {
@@ -103,47 +166,9 @@ const DonutWheel = ({
         };
       });
 
-      addWheeldata(
-        wheelData,
-        405,
-        470,
-        circleOneColour,
-        'Generell',
-        circleOneEvCol
-      );
-      addWheeldata(
-        wheelData,
-        390,
-        317,
-        circleTwoColour,
-        'Kategori 1',
-        circleTwoEvCol
-      );
-      addWheeldata(
-        wheelData,
-        300,
-        240,
-        circleThreeColour,
-        'Kategori 2',
-        circleThreeEvCol
-      );
-      addWheeldata(
-        wheelData,
-        224,
-        154,
-        circleFourColour,
-        'Kategori 3',
-        circleFourEvCol
-      );
-
-      //  create arc for each circle
-      drawArcCircles(wheelData, svgEl);
-
       let mappedArcs = mappedItems.map((item) => {
-        let wheel = wheelData.find((c) => c.category == item.category);
-
+        let wheel = donutWheelData.find((c) => c.category == item.category);
         const arc = d3.arc();
-        const textArc = d3.arc();
         const start = getDegreeFromDay(item.startDay) * (Math.PI / 180);
         const end = getDegreeFromDay(item.endDay) * (Math.PI / 180);
 
@@ -172,45 +197,58 @@ const DonutWheel = ({
             start,
             end
           ),
-          textLabel: textArc({
-            innerRadius: wheel.innerRadius + 50,
-            outerRadius: wheel.outerRadius - 50,
-            startAngle: start,
-            endAngle: end,
-          }),
-
           colour: eventColour,
           title: item.title,
           id: item.id,
+          endAngle: end,
+          startAngle: start,
         };
       });
 
-      console.log(items);
-
       mappedArcs.forEach((event, index) => {
         let data = mappedItems.find((d) => d.id == event.id);
-        console.log(data);
 
         svgEl
           .append('g')
-          .attr('id', 'pathGroup')
+          .attr('id', `arclabel${data.id}`)
           .append('path')
-          .attr('id', (i) => {
-            return '#arc-label' + data.id;
-          })
           .attr('d', event.arcSvg)
-          .style('fill', event.colour)
-          .attr('transform', 'translate(500,500)');
+          .attr('id', `arcEventElement${data.id}`)
+          .attr('transform', 'translate(500,500)')
+          .style('fill', event.colour);
+
+        let text = svgEl
+          .selectAll(`#arclabel${data.id}`)
+          .append('g')
+          .attr('id', 'textGroup')
+          .append('text')
+          .style('font', "16px 'Rubik")
+          .style('fill', 'white')
+          .attr('x', 8)
+          //   .attr("dy", function(d,i) {
+          //     return (d.endAngle > 90 * Math.PI/180 ? 18 : -11);
+          // })
+          .attr('dy', 20);
+
+        text
+          .append('textPath')
+          // .attr('startOffset', '50%')
+          // .style('text-anchor', 'middle')
+          // .attr('font-size', '15px')
+          // .style('fill', 'black')
+          // .attr('font-family', 'Rubik')
+          .attr('xlink:href', `#arcEventElement${data.id}`)
+          .text(event.title);
 
         svgEl
-          .selectAll('#pathGroup')
+          .selectAll(`#arclabel${data.id}`)
           .style('cursor', 'pointer')
-          .on('mouseover', (e) => {
+          .on('mouseenter', (e) => {
             setTextValue(data.title);
             setDateValue(data.startDate + ' - ' + data.endDate);
             setShowDiv(true);
           })
-          .on('mouseout', (e) => {
+          .on('mouseleave', (e) => {
             setShowDiv(false);
           })
           .on('click', (e) => {
@@ -223,63 +261,15 @@ const DonutWheel = ({
             });
             setIsModalOpen(true);
           });
-
-        // TODO:
-        // forEach gör så att det ökar med en text för grupp?
-        // Fler text fält renderas för varje "PathGroup"
-        svgEl
-          .selectAll('#pathGroup')
-          // .append('g')
-          // .attr('id', 'textGroup')
-          .append('text')
-          .attr('id', 'arcText')
-
-          .attr('x', event.centroid[0])
-          .attr('y', event.centroid[1])
-          .style('text-anchor', 'middle')
-          .style('font', "14px 'Helvetica Neue'")
-          .style('fill', 'black')
-          // // .append('textPath')
-          .text(event.title)
-          .attr('transform', 'translate(500,500)');
-        // .attr('xlink:href', (d, i, j) => {
-        //   return '#arc-label' + event.id;
-        // });
-
-        // svgEl
-        //   .append('foreignObject')
-        //   .attr('transform', 'translate(500,500)')
-        // .attr('x', event.centroid[0])
-        // .attr('y', event.centroid[1])
-        //   .attr('width', 80)
-        //   .attr('height', 80)
-        //   .append('xhtml:div')
-        //   .style('height', '80px')
-        //   .style('width', '80px')
-
-        //   .style('font', "12px 'Helvetica Neue'")
-        //   .html(`<h3 >${event.title}</h3>`);
       });
 
       // Populate array with data - months
       populateMonthLabels(monthTextUpper, 24, 180, monthsLabelUpper, 488, 11);
       populateMonthLabels(monthTextLower, 24, 0, monthsLabelLower, 497, 11);
 
-      // Populate array with data - days
+      // // Populate array with data - days
       populateDateLabels(datesUpper, 52, 0, datesLabelUpper, 473, 26);
       populateDateLabels(datesLower, 52, 180, datesLabelLower, 482, 26);
-
-      // Category one
-      populateCategoryLabels(cateOneUpper, 6, 90, 392, circleTwoTitle);
-      populateCategoryLabels(catOneLower, 6, 270, 401, circleTwoTitle);
-
-      // Category Two
-      populateCategoryLabels(catTwoUpper, 6, 90, 303, circleThreeTitle);
-      populateCategoryLabels(catTwoLower, 6, 270, 312, circleThreeTitle);
-
-      // Category three
-      populateCategoryLabels(catThreeUpper, 6, 90, 225, circelFourTitle);
-      populateCategoryLabels(catThreeLower, 6, 270, 234, circelFourTitle);
 
       // Month labels
       drawText(monthTextUpper, -105, 'monthUpper', svgEl);
@@ -288,68 +278,15 @@ const DonutWheel = ({
       // Date labels
       drawText(datesUpper, 90, 'dateUpper', svgEl);
       drawText(datesLower, 90, 'dateLower', svgEl);
-
-      // first category
-      drawText(cateOneUpper, 180, 'firstCatUpper', svgEl);
-      drawText(catOneLower, 180, 'firstCatLower', svgEl);
-
-      // second category
-      drawText(catTwoUpper, 180, 'secondCatUpper', svgEl);
-      drawText(catTwoLower, 180, 'secondCatLower', svgEl);
-
-      // third category
-      drawText(catThreeUpper, 180, 'thirdCatUpper', svgEl);
-      drawText(catThreeLower, 180, 'thirdCatLower', svgEl);
     }
-    // } else {
-    //   // Populate array with data - months
-    //   populateMonthLabels(monthTextUpper, 24, 180, monthsLabelUpper, 488, 11);
-    //   populateMonthLabels(monthTextLower, 24, 0, monthsLabelLower, 497, 11);
-
-    //   // Populate array with data - days
-    //   populateDateLabels(datesUpper, 52, 0, datesLabelUpper, 473, 26);
-    //   populateDateLabels(datesLower, 52, 180, datesLabelLower, 482, 26);
-
-    //   // Category one
-    //   populateCategoryLabels(cateOneUpper, 6, 90, 392, 'Kategori 1');
-    //   populateCategoryLabels(catOneLower, 6, 270, 401, 'Kategori 1');
-
-    //   // Category Two
-    //   populateCategoryLabels(catTwoUpper, 6, 90, 303, 'Kategori 2');
-    //   populateCategoryLabels(catTwoLower, 6, 270, 312, 'Kategori 2');
-
-    //   // Category three
-    //   populateCategoryLabels(catThreeUpper, 6, 90, 225, 'Kategori 3');
-    //   populateCategoryLabels(catThreeLower, 6, 270, 234, 'Kategori 3');
-
-    //   // Month labels
-    //   drawText(monthTextUpper, -105, svgEl);
-    //   drawText(monthTextLower, -105, svgEl);
-
-    //   // Date labels
-    //   drawText(datesUpper, 90, svgEl);
-    //   drawText(datesLower, 90, svgEl);
-
-    //   // first category
-    //   drawText(cateOneUpper, 180, svgEl);
-    //   drawText(catOneLower, 180, svgEl);
-
-    //   // second category
-    //   drawText(catTwoUpper, 180, svgEl);
-    //   drawText(catTwoLower, 180, svgEl);
-
-    //   // third category
-    //   drawText(catThreeUpper, 180, svgEl);
-    //   drawText(catThreeLower, 180, svgEl);
-
-    //   addWheeldata(wheelData, 405, 470, 'yellow', 'Generell', 'red');
-    //   addWheeldata(wheelData, 390, 317, 'yellow', 'Kategori 1', 'red');
-    //   addWheeldata(wheelData, 300, 240, 'yellow', 'Kategori 2', 'red');
-    //   addWheeldata(wheelData, 224, 154, 'yellow', 'Kategori 3', 'red');
-
-    //   drawArcCircles(wheelData, svgEl);
-    // }
-  }, [items]);
+  }, [
+    items,
+    circlesForDonut,
+    circelOneTitle,
+    circleTwoTitle,
+    circleThreeTitle,
+    circelFourTitle,
+  ]);
 
   const DivHover = (): JSX.Element => {
     return (

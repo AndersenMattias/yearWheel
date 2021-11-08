@@ -1,30 +1,203 @@
-import { Arc } from './interfaces/IDonut';
-import { getDegreeFromDay } from './DonutHandler';
+import * as d3 from 'd3';
+import { v4 as uuid } from 'uuid';
 
-export const wheelData = [
+const arc = d3.arc();
+let id = uuid();
+
+export const donutWheelData = [
   {
-    innerRadius: 499,
-    outerRadius: 500,
-    startAngle: 0 * (Math.PI / 180),
-    endAngle: 360 * (Math.PI / 180),
-    colour: '#000',
-    arcSvg: undefined,
-    category: '',
-    eventColour: '',
+    arcSvg: arc({
+      innerRadius: 405,
+      outerRadius: 470,
+      startAngle: 0 * (Math.PI / 180),
+      endAngle: 90 * (Math.PI / 180),
+    }),
+    innerRadius: 405,
+    outerRadius: 470,
+    category: 'Generell',
+    id: id,
   },
   {
-    innerRadius: 485,
-    outerRadius: 486,
-    startAngle: getDegreeFromDay(0) * (Math.PI / 180),
-    endAngle: getDegreeFromDay(360) * (Math.PI / 180),
-    colour: '#000',
-    arcSvg: undefined,
-    category: '',
-    eventColour: '',
+    arcSvg: arc({
+      innerRadius: 405,
+      outerRadius: 470,
+      startAngle: 90 * (Math.PI / 180),
+      endAngle: 180 * (Math.PI / 180),
+    }),
+    innerRadius: 405,
+    outerRadius: 470,
+    category: 'Generell',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 405,
+      outerRadius: 470,
+      startAngle: 180 * (Math.PI / 180),
+      endAngle: 270 * (Math.PI / 180),
+    }),
+    innerRadius: 405,
+    outerRadius: 470,
+    category: 'Generell',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 405,
+      outerRadius: 470,
+      startAngle: 270 * (Math.PI / 180),
+      endAngle: 360 * (Math.PI / 180),
+    }),
+    innerRadius: 405,
+    outerRadius: 470,
+    category: 'Generell',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 390,
+      outerRadius: 317,
+      startAngle: 0 * (Math.PI / 180),
+      endAngle: 90 * (Math.PI / 180),
+    }),
+    innerRadius: 390,
+    outerRadius: 317,
+    category: 'Kategori 1',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 390,
+      outerRadius: 317,
+      startAngle: 90 * (Math.PI / 180),
+      endAngle: 180 * (Math.PI / 180),
+    }),
+    innerRadius: 390,
+    outerRadius: 317,
+    category: 'Kategori 1',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 390,
+      outerRadius: 317,
+      startAngle: 180 * (Math.PI / 180),
+      endAngle: 270 * (Math.PI / 180),
+    }),
+    innerRadius: 390,
+    outerRadius: 317,
+    category: 'Kategori 1',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 390,
+      outerRadius: 317,
+      startAngle: 270 * (Math.PI / 180),
+      endAngle: 360 * (Math.PI / 180),
+    }),
+    innerRadius: 390,
+    outerRadius: 317,
+    category: 'Kategori 1',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 300,
+      outerRadius: 240,
+      startAngle: 0 * (Math.PI / 180),
+      endAngle: 90 * (Math.PI / 180),
+    }),
+    innerRadius: 300,
+    outerRadius: 240,
+    category: 'Kategori 2',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 300,
+      outerRadius: 240,
+      startAngle: 90 * (Math.PI / 180),
+      endAngle: 180 * (Math.PI / 180),
+    }),
+    innerRadius: 300,
+    outerRadius: 240,
+    category: 'Kategori 2',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 300,
+      outerRadius: 240,
+      startAngle: 180 * (Math.PI / 180),
+      endAngle: 270 * (Math.PI / 180),
+    }),
+    innerRadius: 300,
+    outerRadius: 240,
+    category: 'Kategori 2',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 300,
+      outerRadius: 240,
+      startAngle: 270 * (Math.PI / 180),
+      endAngle: 360 * (Math.PI / 180),
+    }),
+    innerRadius: 300,
+    outerRadius: 240,
+    category: 'Kategori 2',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 224,
+      outerRadius: 154,
+      startAngle: 0 * (Math.PI / 180),
+      endAngle: 90 * (Math.PI / 180),
+    }),
+    innerRadius: 224,
+    outerRadius: 154,
+    category: 'Kategori 3',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 224,
+      outerRadius: 154,
+      startAngle: 90 * (Math.PI / 180),
+      endAngle: 180 * (Math.PI / 180),
+    }),
+    innerRadius: 224,
+    outerRadius: 154,
+    category: 'Kategori 3',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 224,
+      outerRadius: 154,
+      startAngle: 180 * (Math.PI / 180),
+      endAngle: 270 * (Math.PI / 180),
+    }),
+    innerRadius: 224,
+    outerRadius: 154,
+    category: 'Kategori 3',
+    id: id,
+  },
+  {
+    arcSvg: arc({
+      innerRadius: 224,
+      outerRadius: 154,
+      startAngle: 270 * (Math.PI / 180),
+      endAngle: 360 * (Math.PI / 180),
+    }),
+    innerRadius: 224,
+    outerRadius: 154,
+    category: 'Kategori 3',
+    id: id,
   },
 ];
-
-export const wheelEventData = [];
 
 export const monthsLabelUpper = [
   'Oktober',
