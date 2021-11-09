@@ -178,6 +178,7 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
               onChange={(_, value) =>
                 setInput((prev) => ({ ...prev, title: value }))
               }
+              maxLength={20}
             />
             <TextField
               label='Beskrivning'

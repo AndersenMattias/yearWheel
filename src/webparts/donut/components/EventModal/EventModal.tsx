@@ -17,10 +17,11 @@ import {
   IconButton,
   IButtonStyles,
 } from '@fluentui/react/lib/Button';
+import { useEffect, useState } from 'react';
+import { sp } from '@pnp/sp';
+import { IDonutModalProps } from '../interfaces/IDonut';
 
-import { IDonutModalProps } from './interfaces/IDonut';
-
-export const DonutModal = ({
+export const EventModal = ({
   isModalOpen,
   setIsModalOpen,
   data,
@@ -119,4 +120,4 @@ const iconButtonStyles: Partial<IButtonStyles> = {
   },
 };
 
-export default DonutModal;
+export default EventModal;

@@ -29,6 +29,8 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
     const element: React.ReactElement<IDonutProps> = React.createElement(
       Donut,
       {
+        description: this.properties.description,
+        colour: this.properties.colour,
         collectionData: this.properties.collectionData,
         eventListData: this.properties.eventListData,
         selectedCategory: this.properties.selectedCategory,
@@ -42,7 +44,7 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
         circleThreeEvCol: this.properties.circleThreeEvCol,
         circleThreeColour: this.properties.circleThreeColour,
         circleFourColour: this.properties.circleFourColour,
-        circelFourTitle: this.properties.circelFourTitle,
+        circleFourTitle: this.properties.circleFourTitle,
         circleFourEvCol: this.properties.circleFourEvCol,
       }
     );
@@ -56,13 +58,6 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
 
   // protected get dataVersion(): Version {
   //   return Version.parse('1.0');
-  // }
-
-  onPropertyPaneFieldChanged() {}
-
-  // protected get disableReactivePropertyChanges(): boolean {
-  //   console.log("disableReactivePropertyChanges")
-  //   return false;
   // }
 
   private displaySettings(): IPropertyPaneGroup {
@@ -83,12 +78,14 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
           value:
             this.properties.selectedCategory == 'circleOne' ? 'Generell' : '',
           disabled: this.properties.selectedCategory == 'circleOne',
+          maxLength: 20,
         }
       );
       let circleColour: IPropertyPaneField<any> = PropertyPaneTextField(
         this.properties.selectedCategory + 'Colour',
         {
           label: 'Välj färg',
+          maxLength: 10,
         }
       );
 
@@ -96,6 +93,7 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
         this.properties.selectedCategory + 'EvCol',
         {
           label: 'Välj färg för event',
+          maxLength: 10,
         }
       );
 
@@ -112,7 +110,7 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
       pages: [
         {
           header: {
-            description: '',
+            description: strings.PropertyPaneDescription,
           },
           groups: [
             {

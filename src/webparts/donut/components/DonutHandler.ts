@@ -57,6 +57,8 @@ export const getCentroid = (innerRadius, outerRadius, startAngle, endAngle) => {
   return [Math.cos(a) * r, Math.sin(a) * r];
 };
 
+
+
 export const createDonutCircle = (
   arr,
   innerRadius: number,
@@ -71,7 +73,7 @@ export const createDonutCircle = (
   evColour?: string
 ) => {
   const arc = d3.arc();
-  let id = uuid();
+  let id = uuid()
   return arr.push({
     arcSvg: arc({
       innerRadius: innerRadius,
@@ -86,16 +88,54 @@ export const createDonutCircle = (
     title: title,
     eventColour: evColour,
     id: id,
-  });
+    
+  } )
 };
+export const createEventArc = (
+  startDay,
+  endDay, 
+  arr,
+  innerRadius: number,
+  outerRadius: number,
+  eventColour: string,
+  title:string,
+  id: number,
+  arcStart,
+  arcEnd
+) => {
+  const arc = d3.arc();
+  const start = getDegreeFromDay(startDay) * (Math.PI / 180);
+  const end = getDegreeFromDay(endDay) * (Math.PI / 180);
+  return arr.push({
+    arcSvg: arc({
+      innerRadius: innerRadius,
+      outerRadius: outerRadius,
+      startAngle: start,
+      endAngle: end,
+    }),
+    // centroid: getCentroid(
+    //   wheel.innerRadius,
+    //   wheel.outerRadius,
+    //   start,
+    //   end
+    // ),
+    colour: eventColour,
+    title: title,
+    id: id,
+    startAngle: arcStart,
+    endAngle: arcEnd,
+    
+  } )
+};
+
 
 export const addWheeldata = (
   arr,
   innerradius: number,
   outerRadius: number,
-  colour: any,
-  category: any,
-  evColour: any
+  colour: string,
+  category: string,
+  evColour: string
 ) => {
   return arr.push({
     innerRadius: innerradius,
@@ -110,11 +150,11 @@ export const addWheeldata = (
 };
 
 export const addToList = async (
-  title,
-  description,
-  category,
-  startDate,
-  endDate
+  title: string,
+  description: string,
+  category: string,
+  startDate: string,
+  endDate: string
 ) => {
   const iar: IItemAddResult = await sp.web.lists
     .getByTitle('EventPlanner')
@@ -199,7 +239,9 @@ export const drawText = (arr: any[], rotate: number, name: string, svgEl) => {
         }, ${coord.coords.y})`
       );
   });
+  
 };
+
 
 export const populateMonthLabels = (
   arr,

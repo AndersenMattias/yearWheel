@@ -39,11 +39,11 @@ export const HandleEventModal = ({ items, setItems }: any): JSX.Element => {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [selectedCategory, setSelectedcategory] = useState<IDropdownOption>();
   const [input, setInput] = useState<IEditEvent>({
-    Title: '',
-    Description: '',
-    Category: '',
-    StartDate: '',
-    DueDate: '',
+    title: '',
+    description: '',
+    category: '',
+    startDate: '',
+    dueDate: '',
   });
   useEffect(() => {}, [items]);
 
@@ -149,7 +149,7 @@ export const HandleEventModal = ({ items, setItems }: any): JSX.Element => {
         />
         <Dropdown
           label='Kategori'
-          selectedKey={input.Category ? input.Category : undefined}
+          selectedKey={input.category ? input.category : undefined}
           // eslint-disable-next-line react/jsx-no-bind
           onChange={onChange}
           placeholder={item.Category}

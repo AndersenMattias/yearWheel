@@ -15,7 +15,7 @@ const Donut = ({
   circleThreeTitle,
   circleThreeColour,
   circleThreeEvCol,
-  circelFourTitle,
+  circleFourTitle,
   circleFourColour,
   circleFourEvCol,
 }: IDonutProps): JSX.Element => {
@@ -31,7 +31,7 @@ const Donut = ({
         circleThreeTitle={circleThreeTitle}
         circleThreeColour={circleThreeColour}
         circleThreeEvCol={circleThreeEvCol}
-        circelFourTitle={circelFourTitle}
+        circleFourTitle={circleFourTitle}
         circleFourColour={circleFourColour}
         circleFourEvCol={circleFourEvCol}
         collectionData={collectionData}
