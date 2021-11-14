@@ -9,6 +9,9 @@ import {
   IIconProps,
   IStackProps,
   TextField,
+  DatePicker,
+  defaultDatePickerStrings,
+  Label,
 } from '@fluentui/react';
 
 import { INewEvent } from '../interfaces/IDonut';
@@ -25,6 +28,7 @@ import {
   IDropdownStyles,
 } from '@fluentui/react/lib/Dropdown';
 import { addToList } from '../DonutHandler';
+import { PrimaryButton } from '@microsoft/office-ui-fabric-react-bundle';
 
 export const AddEventModal = ({ setItems }: any): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -35,6 +39,7 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
 
   const [selectedCategory, setSelectedcategory] = useState<IDropdownOption>();
   const [input, setInput] = useState<INewEvent>({
+    id: 1,
     title: '',
     description: '',
     category: '',
@@ -101,6 +106,7 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
     ) {
       try {
         const newEvent = {
+          Id: 1,
           Title: input.title,
           Description: input.description,
           Category: selectedCategory.text,
@@ -202,24 +208,36 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
               options={categoryOptions}
               styles={dropdownStyles}
             />
+            <Label>Välj startdatum</Label>
+            <DatePicker
+              placeholder={input.startDate}
+              // value={updatedEvent.startDate}
+              ariaLabel='Välj ett datum'
+              // DatePicker uses English strings by default. For localized apps, you must override this prop.
+              strings={defaultDatePickerStrings}
+              onSelectDate={(value) => {
+                console.log('value', value);
+                setInput((prev) => ({
+                  ...prev,
+                  startDate: value,
+                }));
+              }}
+            />
+            <Label>Välj slutdatum</Label>
+            <DatePicker
+              // value={updatedEvent.dueDate}
+              ariaLabel='Välj ett datum'
+              strings={defaultDatePickerStrings}
+              onSelectDate={(value) => {
+                console.log(value);
+                setInput((prev) => ({
+                  ...prev,
+                  dueDate: value,
+                }));
+              }}
+            />
 
-            <TextField
-              label='Startdatum'
-              type='date'
-              value={input.startDate}
-              onChange={(_, value) =>
-                setInput((prev) => ({ ...prev, startDate: value }))
-              }
-            />
-            <TextField
-              label='Slutdatum'
-              type='date'
-              value={input.dueDate}
-              onChange={(_, value) =>
-                setInput((prev) => ({ ...prev, dueDate: value }))
-              }
-            />
-            <DefaultButton type='submit'>Lägg till</DefaultButton>
+            <PrimaryButton type='submit'>Lägg till</PrimaryButton>
           </form>
           {showError && <ErrorMessage />}
         </div>

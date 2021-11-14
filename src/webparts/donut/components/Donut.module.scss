@@ -4,18 +4,54 @@
   .container {
     height: 100%;
     width: 100%;
-    // position: relative;
+    position: relative;
     /*    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1); */
     background-color: red;
   }
 
-  .textDiv {
-    height: 50px;
-    width: 50px;
-    background-color: red;
-    top: 50%;
-    left: 75%;
-    z-index: 100;
+  .eventHeader {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .eventContainer {
+    display: flex;
+    padding-left: 2rem;
+    width: 450px;
+    height: 200px;
+  }
+
+  .editEventBtn {
+    padding-left: 2rem;
+    padding-bottom: 3rem;
+  }
+
+  .eventInput {
+    padding-left: 2rem;
+    // margin: 5px;
+    // width: 50%;
+  }
+
+  .eventLabel {
+    padding-left: 2rem;
+  }
+
+  .editEventContainer {
+    display: flex;
+    padding-left: 2rem;
+    width: 300px;
+    height: 450px;
+  }
+
+  .iconButtonStyles {
+    margin-left: auto;
+    margin-top: 4px;
+    margin-right: 2px;
+  }
+
+  .btnsEvContainer {
+    padding-left: 2rem;
+    padding-top: 0.5rem;
   }
 
   .modalContainer {

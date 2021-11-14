@@ -10,23 +10,22 @@ import {
   monthsLabelUpper,
   monthsLabelLower,
   donutWheelData,
-  hiddenLabelArcs,
+  hiddenLabelArcsUpper,
 } from './DonutWheelData';
 
 import AddEventModal from './AddEventModal/AddEventModal';
-import HandleEventModal from './HandleEventModal/HandleEventModal';
 import { EventModal } from './EventModal/EventModal';
 
 import {
   drawText,
   getDayOfYear,
-  getCentroid,
-  getDegreeFromDay,
   dateWithoutTime,
   populateMonthLabels,
   populateDateLabels,
   createDonutCircle,
   createEventArc,
+  populateArcLabels,
+  drawArcLabels,
 } from './DonutHandler';
 
 import { IDonutWheelProps, IListObj } from './interfaces/IDonut';
@@ -37,8 +36,6 @@ import '@pnp/sp/lists';
 import '@pnp/sp/items';
 
 const DonutWheel = ({
-  collectionData,
-  selectedCategory,
   circelOneTitle,
   circleOneColour,
   circleOneEvCol,
@@ -57,7 +54,7 @@ const DonutWheel = ({
   const [items, setItems] = useState<any>([]);
   const [textValue, setTextValue] = useState<string>('');
   const [dateValue, setDateValue] = useState<string>('');
-  const [dataObj, setDataObj] = useState<IListObj>({});
+  const [eventData, setEventData] = useState<IListObj>({});
 
   const ref = useRef();
   const svgEl = d3.select(ref.current);
@@ -73,6 +70,10 @@ const DonutWheel = ({
   let circlesForDonut = [];
   let eventArcs = [];
 
+  let lowerEventArcsOne = [];
+  let lowerEventArcsTWo = [];
+  let lowerEventArcsThree = [];
+
   useEffect(() => {
     const fetchList = async () => {
       const items: any[] = await sp.web.lists
@@ -85,13 +86,83 @@ const DonutWheel = ({
     fetchList();
   }, []);
 
+  // creates black "circles" for months and dates
+  createDonutCircle(labelsforCircle, 499, 500, 499, 500, 0, 360, '#000');
+  createDonutCircle(labelsforCircle, 485, 486, 485, 486, 0, 360, '#000');
+
+  //
+  const renderEventText = (
+    index,
+    event,
+    data,
+    fontSize: number,
+    xVal: number,
+    yval: number,
+    dyVal: number,
+    textAnchor: string,
+    offSet: string
+  ) => {
+    svgEl
+      .append('g')
+      .attr('id', `arclabelLower${index}`)
+      .append('path')
+      .attr('stroke-width', '1.5px')
+      .attr('stroke-linejoin', 'round')
+      .attr('stroke', 'black')
+      .attr('d', event.arcSvg)
+      .attr('id', `arcEventElementLower${index}`)
+
+      .attr('transform', `translate(500,500)`)
+      .style('fill', event.colour);
+
+    let text = svgEl
+      .selectAll(`#arclabelLower${index}`)
+      .append('g')
+      .attr('id', 'textGroup')
+      .append('text')
+
+      .style('font', `${fontSize}px 'Rubik`)
+      .style('fill', 'white')
+      .attr('font-weight', 400)
+      .attr('x', xVal)
+      .attr('y', yval)
+      .attr('dy', dyVal);
+
+    text
+      .append('textPath')
+      .attr('startOffset', offSet)
+      .attr('text-anchor', textAnchor)
+      .attr('xlink:href', `#arcEventElementLower${index}`)
+      .text(event.title);
+
+    svgEl
+      .selectAll(`#arclabelLower${index}`)
+      .style('cursor', 'pointer')
+      .on('mouseenter', (e) => {
+        setTextValue(data.title);
+        setDateValue(data.startDate + ' - ' + data.endDate);
+        setShowDiv(true);
+      })
+      .on('mouseleave', (e) => {
+        setShowDiv(false);
+      })
+      .on('click', (e) => {
+        setEventData({
+          ...eventData,
+          Id: data.id,
+          Title: data.title,
+          Description: data.description,
+          Category: data.category,
+          StartDate: data.startDate,
+          DueDate: data.endDate,
+        });
+        setIsModalOpen(true);
+      });
+  };
+
   useEffect(() => {
     // prevents duplicate elements on load / re render
     svgEl.selectAll('*').remove();
-
-    // creates black "circles" for months and dates
-    createDonutCircle(labelsforCircle, 499, 500, 499, 500, 0, 360, '#000');
-    createDonutCircle(labelsforCircle, 485, 486, 485, 486, 0, 360, '#000');
 
     labelsforCircle.forEach((circle) => {
       svgEl
@@ -104,7 +175,7 @@ const DonutWheel = ({
         .style('fill', circle.colour);
     });
 
-    hiddenLabelArcs.forEach((circle, index) => {
+    hiddenLabelArcsUpper.forEach((circle, index) => {
       let circleTitle;
 
       if (circle.category === 'Generell') {
@@ -131,22 +202,14 @@ const DonutWheel = ({
         .append('g')
         .attr('id', 'arcLabelText')
         .append('text')
-        // .style('font', "14px 'Rubik")
         .style('fill', 'black')
-        // .attr('text-anchor', 'center')
         .attr('x', 3)
-        // .attr('dy', function (d, i) {
-        //   return circle.endAngle > (90 * Math.PI) / 180 ? 18 : -11;
-        // });
-
         .attr('dy', 13);
 
       text
         .append('textPath')
         .attr('startOffset', '22%')
         .attr('font-size', '16px')
-        // .style('stroke', 'white')
-        // .style('stroke-width', 1)
         .attr('font-family', 'sans-serif')
         .attr('xlink:href', `#labelArcElement${index}`)
         .text(circleTitle);
@@ -154,20 +217,15 @@ const DonutWheel = ({
 
     donutWheelData.forEach((circle, index) => {
       let circleColour;
-      // let circleTitle;
 
       if (circle.category === 'Generell') {
         circleColour = circleOneColour;
-        // circleTitle = circelOneTitle;
       } else if (circle.category === 'Kategori 1') {
         circleColour = circleTwoColour;
-        // circleTitle = circleTwoTitle;
       } else if (circle.category === 'Kategori 2') {
         circleColour = circleThreeColour;
-        // circleTitle = circleThreeTitle;
       } else if (circle.category === 'Kategori 3') {
         circleColour = circleFourColour;
-        // circleTitle = circleFourTitle;
       }
 
       svgEl
@@ -178,44 +236,12 @@ const DonutWheel = ({
         .attr('id', `wheelRingElement${index}`)
         .attr('transform', 'translate(500,500)')
         .style('fill', circleColour);
-
-      // let text = svgEl
-      //   .selectAll(`#wheelRing${circle.id}`)
-      //   .append('g')
-      //   .attr('id', 'wheelRingText')
-      //   .append('text')
-      //   .attr('font-weight', 100)
-      //   // .style('font', "14px 'Rubik")
-      //   // .style('fill', 'black')
-      //   // .attr('text-anchor', 'center')
-      //   .attr('x', 5)
-      //   // .attr('dy', function (d, i) {
-      //   //   console.log(circle.endAngle);
-      //   //   console.log(90 * Math.PI);
-      //   //   return 0;
-      //   //   // return circle.endAngle > 90 * (Math.PI / 180) ? 25 : -15;
-      //   // });
-
-      //   .attr('dy', -2);
-
-      // text
-      //   .append('textPath')
-      //   // .attr('startOffset', '50%')
-      //   // .style('text-anchor', 'middle')
-      //   // .attr('startOffset', '1%')
-      //   .attr('font-size', '14px')
-      //   .attr('font-weight', 100)
-      //   // .style('stroke', 'white')
-      //   // .style('stroke-width', 1)
-      //   .attr('font-family', 'sans-serif')
-      //   .attr('xlink:href', `#wheelRingElement${index}`)
-      //   .text(circleTitle);
     });
   });
 
   useEffect(() => {
     if (items.length >= 1) {
-      const mappedItems = items.map((item, index) => {
+      const mappedItems = items.map((item) => {
         return {
           id: item.Id,
           title: item.Title,
@@ -229,88 +255,53 @@ const DonutWheel = ({
       });
 
       mappedItems.map((item) => {
-        let wheel = donutWheelData.find((c) => c.category == item.category);
+        if (item.category) {
+          let wheel = donutWheelData.find((c) => c.category == item.category);
+          let eventColour;
 
-        let eventColour;
+          if (wheel.category === 'Generell') {
+            eventColour = circleOneEvCol;
+          } else if (wheel.category === 'Kategori 1') {
+            eventColour = circleTwoEvCol;
+          } else if (wheel.category === 'Kategori 2') {
+            eventColour = circleThreeEvCol;
+          } else if (wheel.category === 'Kategori 3') {
+            eventColour = circleFourEvCol;
+          }
 
-        if (wheel.category === 'Generell') {
-          eventColour = circleOneEvCol;
-        } else if (wheel.category === 'Kategori 1') {
-          eventColour = circleTwoEvCol;
-        } else if (wheel.category === 'Kategori 2') {
-          eventColour = circleThreeEvCol;
-        } else if (wheel.category === 'Kategori 3') {
-          eventColour = circleFourEvCol;
+          createEventArc(
+            item.startDay,
+            item.endDay,
+            eventArcs,
+            wheel.innerRadius,
+            wheel.outerRadius,
+            wheel.innerRadius,
+            wheel.outerRadius,
+            eventColour,
+            item.title,
+            item.id,
+            wheel.startAngle,
+            wheel.endAngle
+          );
         }
-
-        createEventArc(
-          item.startDay,
-          item.endDay,
-          eventArcs,
-          wheel.innerRadius,
-          wheel.outerRadius,
-          eventColour,
-          item.title,
-          item.id,
-          wheel.startAngle,
-          wheel.endAngle
-        );
       });
 
       eventArcs.forEach((event, index) => {
         let data = mappedItems.find((d) => d.id == event.id);
+        console.log('data', data);
 
-        svgEl
-          .append('g')
-          .attr('id', `arclabel${data.id}`)
-          .append('path')
-          .attr('d', event.arcSvg)
-          .attr('id', `arcEventElement${data.id}`)
-          .attr('transform', 'translate(500,500)')
-          .style('fill', event.colour);
+        renderEventText(index, event, data, 20, 80, 0, 40, 'none', '0%');
+        const center = (data.startDay + data.endDay) / 2;
 
-        let text = svgEl
-          .selectAll(`#arclabel${data.id}`)
-          .append('g')
-          .attr('id', 'textGroup')
-          .append('text')
-          // .style('text-anchor', 'middle')
-
-          .style('font', "16px 'Rubik")
-          .style('fill', 'white')
-          .attr('x', 8)
-          .attr('dy', 20);
-
-        text
-          .append('textPath')
-          // .attr('startOffset', '17%')
-          // .attr('font-size', '15px')
-          // .style('fill', 'black')
-          // .attr('font-family', 'Rubik')
-          .attr('xlink:href', `#arcEventElement${data.id}`)
-          .text(event.title);
-
-        svgEl
-          .selectAll(`#arclabel${data.id}`)
-          .style('cursor', 'pointer')
-          .on('mouseenter', (e) => {
-            setTextValue(data.title);
-            setDateValue(data.startDate + ' - ' + data.endDate);
-            setShowDiv(true);
-          })
-          .on('mouseleave', (e) => {
-            setShowDiv(false);
-          })
-          .on('click', (e) => {
-            setDataObj({
-              ...dataObj,
-              title: data.title,
-              description: data.description,
-              start: data.startDate,
-              end: data.endDate,
-            });
-            setIsModalOpen(true);
-          });
+        if (data.startDay < 90 && data.startDay > 0) {
+          renderEventText(index, event, data, 20, 80, 0, 40, 'middle', '20%');
+        } else if (data.startDay > 90 && data.startDay < 180) {
+          renderEventText(index, event, data, 20, 80, 0, 40, 'middle', '60%');
+        } else if (data.startDay > 180 && data.startDay < 270) {
+          renderEventText(index, event, data, 20, 80, 0, 40, 'middle', '70%');
+        } else if (data.startDay > 270) {
+          renderEventText(index, event, data, 20, 200, 0, 40, 'middle', '10%');
+        }
       });
 
       // Populate array with data - months
@@ -321,6 +312,89 @@ const DonutWheel = ({
       populateDateLabels(datesUpper, 52, 0, datesLabelUpper, 473, 26);
       populateDateLabels(datesLower, 52, 180, datesLabelLower, 482, 26);
 
+      populateArcLabels(
+        lowerEventArcsOne,
+        1,
+        405,
+        390,
+        90,
+        180,
+        'Kategori 1',
+        270,
+        425,
+        circleTwoTitle,
+        '30%'
+      );
+
+      populateArcLabels(
+        lowerEventArcsOne,
+        1,
+        405,
+        390,
+        180,
+        270,
+        'Kategori 1',
+        270,
+        425,
+        circleTwoTitle,
+        '30%'
+      );
+
+      populateArcLabels(
+        lowerEventArcsTWo,
+        2,
+        317,
+        300,
+        90,
+        180,
+        'Kategori 2',
+        270,
+        425,
+        circleThreeTitle,
+        '20%'
+      );
+
+      populateArcLabels(
+        lowerEventArcsTWo,
+        1,
+        317,
+        300,
+        180,
+        270,
+        'Kategori 2',
+        270,
+        425,
+        circleThreeTitle,
+        '20%'
+      );
+      populateArcLabels(
+        lowerEventArcsThree,
+        2,
+        225,
+        239,
+        90,
+        180,
+        'Kategori 3',
+        270,
+        425,
+        circleFourTitle,
+        '4%'
+      );
+
+      populateArcLabels(
+        lowerEventArcsThree,
+        1,
+        223,
+        240,
+        180,
+        270,
+        'Kategori 3',
+        270,
+        425,
+        circleFourTitle,
+        '4%'
+      );
+
       // Month labels
       drawText(monthTextUpper, -105, 'monthUpper', svgEl);
       drawText(monthTextLower, -105, 'monthLower', svgEl);
@@ -328,6 +402,11 @@ const DonutWheel = ({
       // Date labels
       drawText(datesUpper, 90, 'dateUpper', svgEl);
       drawText(datesLower, 90, 'dateLower', svgEl);
+
+      // Draw arc labels lower / title for each circle
+      drawArcLabels(lowerEventArcsOne, svgEl);
+      drawArcLabels(lowerEventArcsTWo, svgEl);
+      drawArcLabels(lowerEventArcsThree, svgEl);
     }
   }, [
     items,
@@ -349,7 +428,7 @@ const DonutWheel = ({
 
   return (
     <>
-      <HandleEventModal items={items} setItems={setItems} />
+      {/* <HandleEventModal items={items} setItems={setItems} /> */}
       <AddEventModal setItems={setItems} />
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         {showDiv && <DivHover />}
@@ -358,7 +437,9 @@ const DonutWheel = ({
             isModalOpen={isModalOpen}
             setIsModalOpen={setIsModalOpen}
             items={items}
-            data={dataObj}
+            setItems={setItems}
+            eventData={eventData}
+            setEventData={setEventData}
           />
         )}
 

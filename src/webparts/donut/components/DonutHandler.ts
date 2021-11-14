@@ -6,6 +6,9 @@ import '@pnp/sp/items';
 import * as d3 from 'd3';
 import { v4 as uuid } from 'uuid';
 
+const arc = d3.arc();
+let arcId = uuid();
+
 export const getDegreeFromDay = (dayOfYear) => (365 / 360) * dayOfYear;
 
 export const getDayOfYear = (date) => {
@@ -21,7 +24,7 @@ export const getDayOfYear = (date) => {
 };
 
 export const dateWithoutTime = (date) => {
-  if (date.toString().indexOf('T') != -1) {
+  if (new Date(date).toString().indexOf('T') != -1) {
     return new Date(date).toISOString().slice(0, 10);
   } else {
     return date;
@@ -57,8 +60,6 @@ export const getCentroid = (innerRadius, outerRadius, startAngle, endAngle) => {
   return [Math.cos(a) * r, Math.sin(a) * r];
 };
 
-
-
 export const createDonutCircle = (
   arr,
   innerRadius: number,
@@ -73,7 +74,7 @@ export const createDonutCircle = (
   evColour?: string
 ) => {
   const arc = d3.arc();
-  let id = uuid()
+  let id = uuid();
   return arr.push({
     arcSvg: arc({
       innerRadius: innerRadius,
@@ -88,17 +89,18 @@ export const createDonutCircle = (
     title: title,
     eventColour: evColour,
     id: id,
-    
-  } )
+  });
 };
 export const createEventArc = (
   startDay,
-  endDay, 
+  endDay,
   arr,
   innerRadius: number,
   outerRadius: number,
+  outerRad,
+  innerRad,
   eventColour: string,
-  title:string,
+  title: string,
   id: number,
   arcStart,
   arcEnd
@@ -113,21 +115,14 @@ export const createEventArc = (
       startAngle: start,
       endAngle: end,
     }),
-    // centroid: getCentroid(
-    //   wheel.innerRadius,
-    //   wheel.outerRadius,
-    //   start,
-    //   end
-    // ),
+    centroid: getCentroid(innerRad, outerRad, start, end),
     colour: eventColour,
     title: title,
     id: id,
     startAngle: arcStart,
     endAngle: arcEnd,
-    
-  } )
+  });
 };
-
 
 export const addWheeldata = (
   arr,
@@ -228,9 +223,8 @@ export const drawText = (arr: any[], rotate: number, name: string, svgEl) => {
       .attr('x', coord.coords.x)
       .attr('y', coord.coords.y)
       .attr('text-anchor', 'middle')
-      .attr('font-size', '13px')
+      .attr('font-size', '14px')
       .attr('font-family', 'sans-serif')
-
       .text(coord.title)
       .attr(
         'transform',
@@ -239,9 +233,50 @@ export const drawText = (arr: any[], rotate: number, name: string, svgEl) => {
         }, ${coord.coords.y})`
       );
   });
-  
 };
 
+// create label on each arc
+export const drawArcLabels = (arr: any[], svgEl) => {
+  arr.forEach((label, index) => {
+    svgEl
+      .append('g')
+      .attr('id', `arcLabelGroupLower${label.id}`)
+      .append('path')
+      .attr('d', label.arcSvg)
+      .attr('id', `labelArcElementLower${label.id}`)
+      .attr('transform', 'translate(500,500)')
+      .style('fill', 'none');
+
+    let text = svgEl
+      .selectAll(`#arcLabelGroupLower${label.id}`)
+      .append('g')
+      .attr('id', 'arcLabelText')
+      .append('text')
+      .attr('x', label.coords.x)
+      .attr('y', label.coords.y)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '13px')
+      .attr('font-family', 'sans-serif')
+      // .text(circleTitle)
+      // .attr(
+      //   'transform',
+      //   `rotate(${rotate + (360 / arr.length) * (arr.length - index)}, ${
+      //     label.coords.x
+      //   }, ${label.coords.y})`
+      // );
+      .attr('dy', 12);
+
+    text
+      .append('textPath')
+      .attr('startOffset', label.offSet)
+      .attr('font-size', '16px')
+      // .style('stroke', 'white')
+      // .style('stroke-width', 1)
+      .attr('font-family', 'sans-serif')
+      .attr('xlink:href', `#labelArcElementLower${label.id}`)
+      .text(label.title);
+  });
+};
 
 export const populateMonthLabels = (
   arr,
@@ -297,6 +332,40 @@ export const populateCategoryLabels = (
       title: i >= 90 && i <= 270 ? text : '',
       coords: getXY(radius, i - angel, 500),
       angle: i,
+    });
+  }
+};
+
+export const populateArcLabels = (
+  arr,
+  divider: number,
+  innerRadius: number,
+  outerRadius: number,
+  start: number,
+  end: number,
+  category: string,
+  angel: number,
+  radius: number,
+  title: string,
+  offSet
+) => {
+  for (let i = 0; i < 360; i += 360 / divider) {
+    const arc = d3.arc();
+    let id = uuid();
+    arr.push({
+      arcSvg: arc({
+        innerRadius: innerRadius,
+        outerRadius: outerRadius,
+        startAngle: start * (Math.PI / 180),
+        endAngle: end * (Math.PI / 180),
+      }),
+      category: category,
+      title: title,
+      id: id,
+      // title: i >= 90 && i <= 270 ? text : '',
+      angle: i,
+      coords: getXY(radius, i - angel, 500),
+      offSet: offSet,
     });
   }
 };

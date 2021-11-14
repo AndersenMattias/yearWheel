@@ -1,123 +1,261 @@
 import * as React from 'react';
-import { useId, useBoolean } from '@fluentui/react-hooks';
+import { useState } from 'react';
+
+import { IDonutModalProps, IEditEvent } from '../interfaces/IDonut';
+
+import { useId } from '@fluentui/react-hooks';
+
+import styles from '../Donut.module.scss';
+
 import {
-  getTheme,
-  mergeStyleSets,
-  FontWeights,
-  ContextualMenu,
-  Toggle,
   Modal,
-  IDragOptions,
   IIconProps,
-  Stack,
-  IStackProps,
+  TextField,
+  Label,
+  DatePicker,
+  defaultDatePickerStrings,
 } from '@fluentui/react';
 import {
   DefaultButton,
   IconButton,
-  IButtonStyles,
+  PrimaryButton,
 } from '@fluentui/react/lib/Button';
-import { useEffect, useState } from 'react';
+
+import {
+  Dropdown,
+  DropdownMenuItemType,
+  IDropdownStyles,
+} from '@fluentui/react/lib/Dropdown';
+
 import { sp } from '@pnp/sp';
-import { IDonutModalProps } from '../interfaces/IDonut';
+import { dateWithoutTime } from '../DonutHandler';
 
 export const EventModal = ({
   isModalOpen,
   setIsModalOpen,
-  data,
+  eventData,
+  setEventData,
+  items,
+  setItems,
 }: IDonutModalProps): JSX.Element => {
   // const [isModalOpen, { setTrue: showModal, setFalse: hideModal }] =
   //   useBoolean(false);
-  const [isDraggable, { toggle: toggleIsDraggable }] = useBoolean(false);
-  const [keepInBounds, { toggle: toggleKeepInBounds }] = useBoolean(false);
-  // Normally the drag options would be in a constant, but here the toggle can modify keepInBounds
-  const dragOptions = React.useMemo(
-    (): IDragOptions => ({
-      moveMenuItemText: 'Move',
-      closeMenuItemText: 'Close',
-      menu: ContextualMenu,
-      keepInBounds,
-    }),
-    [keepInBounds]
-  );
-
+  const [editMode, setEditMode] = useState(false);
+  const [updatedEvent, setUpdatedEvent] = useState<IEditEvent>({
+    id: eventData.Id,
+    title: eventData.Title,
+    description: eventData.Description,
+    category: eventData.Category,
+    startDate: eventData.StartDate,
+    dueDate: eventData.DueDate,
+  });
   // Use useId() to ensure that the IDs are unique on the page.
   // (It's also okay to use plain strings and manually ensure uniqueness.)
   const titleId = useId('title');
+
+  let list = sp.web.lists.getByTitle('EventPlanner');
+
+  const categoryOptions = [
+    {
+      key: 'categoryHeader',
+      text: 'Kategorier',
+      itemType: DropdownMenuItemType.Header,
+    },
+    { key: 'Generell', text: 'Generell' },
+    { key: 'Kategori 1', text: 'Kategori 1' },
+    { key: 'Kategori 2', text: 'Kategori 2' },
+    { key: 'Kategori 3', text: 'Kategori 3' },
+  ];
+
+  const dropdownStyles: Partial<IDropdownStyles> = { dropdown: { width: 200 } };
+
+  const onUpdateEvent = async () => {
+    const updateEvent = {
+      Id: updatedEvent.id,
+      Title: updatedEvent.title,
+      Description: updatedEvent.description,
+      Category: updatedEvent.category,
+      StartDate: updatedEvent.startDate,
+      DueDate: updatedEvent.dueDate,
+    };
+
+    try {
+      await list.items.getById(eventData.Id).update({
+        Id: updatedEvent.id,
+        Title: updatedEvent.title,
+        Description: updatedEvent.description,
+        Category: updatedEvent.category,
+        StartDate: dateWithoutTime(updatedEvent.startDate),
+        DueDate: dateWithoutTime(updatedEvent.dueDate),
+      });
+    } catch (e) {
+      console.log(e);
+    }
+
+    setItems((prevItems) => {
+      const items: [] = prevItems.map((item) => {
+        if (item.Id == updateEvent.Id) {
+          return updateEvent;
+        } else {
+          return item;
+        }
+      });
+      return items;
+    });
+    setEventData({
+      ...eventData,
+      Id: updatedEvent.id,
+      Title: updatedEvent.title,
+      Description: updatedEvent.description,
+      Category: updatedEvent.category,
+      StartDate: dateWithoutTime(updatedEvent.startDate),
+      DueDate: dateWithoutTime(updatedEvent.dueDate),
+    });
+    setEditMode(!editMode);
+  };
+
+  const onDeleteEvent = async () => {
+    try {
+      await list.items.getById(eventData.Id).delete();
+      setItems(items.filter((item) => item.Id !== eventData.Id));
+    } catch (e) {
+      console.log(e);
+    }
+    console.log('raderar');
+    setIsModalOpen(false);
+  };
+
   return (
     <>
-      <div>
-        <Modal
-          titleAriaId={titleId}
-          isOpen={isModalOpen}
-          onDismiss={() => setIsModalOpen(false)}
-          isBlocking={false}
-          containerClassName={contentStyles.container}
-          dragOptions={isDraggable ? dragOptions : undefined}
-        >
-          <div className={contentStyles.header}>
-            <span id={titleId}>{data.title}</span>
-            <IconButton
-              styles={iconButtonStyles}
-              iconProps={cancelIcon}
-              ariaLabel='Close popup modal'
-              onClick={() => setIsModalOpen(false)}
-            />
+      <Modal
+        className={styles.donut}
+        titleAriaId={titleId}
+        isOpen={isModalOpen}
+        onDismiss={() => setIsModalOpen(false)}
+        isBlocking={false}
+      >
+        {!editMode && (
+          <div className={styles.eventHeader}>
+            <div>
+              <h4 id={titleId} style={{ paddingLeft: '1rem' }}>
+                {eventData.Title}
+              </h4>
+            </div>
+            <div>
+              <IconButton
+                className={styles.iconButtonStyles}
+                iconProps={cancelIcon}
+                ariaLabel='Close popup modal'
+                onClick={() => setIsModalOpen(false)}
+              />
+            </div>
           </div>
-          <div className={contentStyles.body}>
-            <p>{data.description}</p>
-            <p>{data.start + ' - ' + data.end}</p>
+        )}
+
+        {!editMode ? (
+          <div className={styles.donut}>
+            <div className={styles.eventContainer}>
+              <div>
+                <p>{eventData.Description}</p>
+                <p>{eventData.StartDate + ' - ' + eventData.DueDate}</p>
+              </div>
+            </div>
+            <div className={styles.editEventBtn}>
+              <PrimaryButton
+                text='Redigera'
+                onClick={() => setEditMode(!editMode)}
+              />
+            </div>
+            <div className={styles.editEventBtn}>
+              <PrimaryButton text='Radera' onClick={onDeleteEvent} />
+            </div>
           </div>
-        </Modal>
-      </div>
+        ) : (
+          <div className={styles.donut}>
+            <div className={styles.editEventContainer}>
+              <div style={{ paddingTop: '1rem' }}>
+                <Label className={styles.eventLabel}>Titel</Label>
+                <TextField
+                  className={styles.eventInput}
+                  value={updatedEvent.title}
+                  onChange={(e, value) => {
+                    setUpdatedEvent((prev) => ({ ...prev, title: value }));
+                  }}
+                />
+                <Label className={styles.eventLabel}>Beskrivning</Label>
+                <TextField
+                  className={styles.eventInput}
+                  value={updatedEvent.description}
+                  onChange={(e, value) => {
+                    setUpdatedEvent((prev) => ({
+                      ...prev,
+                      description: value,
+                    }));
+                  }}
+                />
+                <Dropdown
+                  className={styles.eventInput}
+                  label='Kategori'
+                  selectedKey={
+                    updatedEvent.category ? updatedEvent.category : undefined
+                  }
+                  // eslint-disable-next-line react/jsx-no-bind
+                  // onChange={onChange}
+                  onChange={(e, value) => {
+                    setUpdatedEvent((prev) => ({
+                      ...prev,
+                      category: value.text,
+                    }));
+                  }}
+                  placeholder={updatedEvent.category}
+                  options={categoryOptions}
+                  styles={dropdownStyles}
+                />
+
+                <Label className={styles.eventLabel}>Välj startdatum</Label>
+                <DatePicker
+                  className={styles.eventInput}
+                  value={new Date(updatedEvent.startDate)}
+                  ariaLabel='Välj ett datum'
+                  // DatePicker uses English strings by default. For localized apps, you must override this prop.
+                  strings={defaultDatePickerStrings}
+                  onSelectDate={(value) => {
+                    setUpdatedEvent((prev) => ({
+                      ...prev,
+                      startDate: value.toLocaleDateString(),
+                    }));
+                  }}
+                />
+                <Label className={styles.eventLabel}>Välj slutdatum</Label>
+                <DatePicker
+                  allowTextInput={true}
+                  className={styles.eventInput}
+                  value={new Date(updatedEvent.dueDate)}
+                  ariaLabel='Välj ett datum'
+                  strings={defaultDatePickerStrings}
+                  onSelectDate={(value) => {
+                    setUpdatedEvent((prev) => ({
+                      ...prev,
+                      dueDate: value.toLocaleDateString(),
+                    }));
+                  }}
+                />
+                <div className={styles.btnsEvContainer}>
+                  <DefaultButton
+                    text='Avbryt'
+                    onClick={() => setEditMode(!editMode)}
+                  />
+                  <PrimaryButton text='Spara' onClick={onUpdateEvent} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </>
   );
 };
 
 const cancelIcon: IIconProps = { iconName: 'Cancel' };
-
-const theme = getTheme();
-const contentStyles = mergeStyleSets({
-  container: {
-    display: 'flex',
-    flexFlow: 'column nowrap',
-    alignItems: 'stretch',
-  },
-  header: [
-    // eslint-disable-next-line deprecation/deprecation
-    theme.fonts.xLargePlus,
-    {
-      flex: '1 1 auto',
-      borderTop: `4px solid ${theme.palette.themePrimary}`,
-      color: theme.palette.neutralPrimary,
-      display: 'flex',
-      alignItems: 'center',
-      fontWeight: FontWeights.semibold,
-      padding: '12px 12px 14px 24px',
-    },
-  ],
-  body: {
-    flex: '4 4 auto',
-    padding: '0 24px 24px 24px',
-    overflowY: 'hidden',
-    selectors: {
-      p: { margin: '14px 0' },
-      'p:first-child': { marginTop: 0 },
-      'p:last-child': { marginBottom: 0 },
-    },
-  },
-});
-
-const iconButtonStyles: Partial<IButtonStyles> = {
-  root: {
-    color: theme.palette.neutralPrimary,
-    marginLeft: 'auto',
-    marginTop: '4px',
-    marginRight: '2px',
-  },
-  rootHovered: {
-    color: theme.palette.neutralDark,
-  },
-};
 
 export default EventModal;

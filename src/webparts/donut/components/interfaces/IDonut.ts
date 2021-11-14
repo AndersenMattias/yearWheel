@@ -9,11 +9,12 @@ export interface Arc {
 }
 
 export interface IListObj {
-  title?: string;
-  description?: string;
-  start?: any;
-  end?: any;
-  location?: string;
+  Id?: number;
+  Title?: string;
+  Category?: string;
+  Description?: string;
+  StartDate?: any;
+  DueDate?: any;
 }
 
 export interface IListEvent {
@@ -28,44 +29,46 @@ export interface IDonutProps {
   description: string;
   colour: string;
   collectionData: any[];
-  eventListData: any
-  selectedCategory: any
-  circelOneTitle: string
-  circleOneColour: string
-  circleOneEvCol: string
-  circleTwoTitle: string
-  circleTwoColour: string
-  circleTwoEvCol: string
-  circleThreeTitle: string
-  circleThreeColour: string
-  circleThreeEvCol: string
-  circleFourTitle: string
-  circleFourColour: string
-  circleFourEvCol: string
+  eventListData: any;
+  selectedCategory: any;
+  circelOneTitle: string;
+  circleOneColour: string;
+  circleOneEvCol: string;
+  circleTwoTitle: string;
+  circleTwoColour: string;
+  circleTwoEvCol: string;
+  circleThreeTitle: string;
+  circleThreeColour: string;
+  circleThreeEvCol: string;
+  circleFourTitle: string;
+  circleFourColour: string;
+  circleFourEvCol: string;
 }
 
 export interface IDonutWheelProps {
   collectionData: string | number | any;
-  selectedCategory: any
-  circelOneTitle: string
-circleOneColour: string
-circleOneEvCol: string
-circleTwoTitle: string
-circleTwoColour: string
-circleTwoEvCol: string
-circleThreeTitle: string
-circleThreeColour: string
-circleThreeEvCol: string
-circleFourTitle: string
-circleFourColour: string
-circleFourEvCol: string
+  selectedCategory: any;
+  circelOneTitle: string;
+  circleOneColour: string;
+  circleOneEvCol: string;
+  circleTwoTitle: string;
+  circleTwoColour: string;
+  circleTwoEvCol: string;
+  circleThreeTitle: string;
+  circleThreeColour: string;
+  circleThreeEvCol: string;
+  circleFourTitle: string;
+  circleFourColour: string;
+  circleFourEvCol: string;
 }
 
 export interface IDonutModalProps {
   isModalOpen: boolean;
   setIsModalOpen: any;
   items?: any[];
-  data: IListObj;
+  setItems?: any;
+  eventData: IListObj;
+  setEventData: any;
 }
 
 export interface IDonutWebPartProps {
@@ -73,20 +76,20 @@ export interface IDonutWebPartProps {
   categoryOption: string;
   collectionData: any;
   colour: string;
-  eventListData: any
-selectedCategory: any
-circelOneTitle: string
-circleOneColour: string
-circleOneEvCol: string
-circleTwoTitle: string
-circleTwoColour: string
-circleTwoEvCol: string
-circleThreeTitle: string
-circleThreeColour: string
-circleThreeEvCol: string
-circleFourTitle: string
-circleFourColour: string
-circleFourEvCol: string
+  eventListData: any;
+  selectedCategory: any;
+  circelOneTitle: string;
+  circleOneColour: string;
+  circleOneEvCol: string;
+  circleTwoTitle: string;
+  circleTwoColour: string;
+  circleTwoEvCol: string;
+  circleThreeTitle: string;
+  circleThreeColour: string;
+  circleThreeEvCol: string;
+  circleFourTitle: string;
+  circleFourColour: string;
+  circleFourEvCol: string;
 }
 
 export interface IPropertyControlsTestWebPartProps {
@@ -94,18 +97,19 @@ export interface IPropertyControlsTestWebPartProps {
 }
 
 export interface INewEvent {
+  id: number;
   title: string;
   description: string;
   category: string;
-  startDate: string
-  dueDate: string
+  startDate: any;
+  dueDate: any;
 }
 
 export interface IEditEvent {
+  id: number;
   title: string;
   description: string;
-  category:string;
-  startDate: string;
-  dueDate: string
-
+  category: any;
+  startDate: any;
+  dueDate: any;
 }
