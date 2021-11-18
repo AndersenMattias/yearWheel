@@ -31,6 +31,7 @@ export interface IDonutProps {
   collectionData: any[];
   eventListData: any;
   selectedCategory: any;
+  library: any;
   circelOneTitle: string;
   circleOneColour: string;
   circleOneEvCol: string;
@@ -48,6 +49,7 @@ export interface IDonutProps {
 export interface IDonutWheelProps {
   collectionData: string | number | any;
   selectedCategory: any;
+  library: any;
   circelOneTitle: string;
   circleOneColour: string;
   circleOneEvCol: string;
@@ -78,6 +80,7 @@ export interface IDonutWebPartProps {
   colour: string;
   eventListData: any;
   selectedCategory: any;
+  selectedLibrary: any;
   circelOneTitle: string;
   circleOneColour: string;
   circleOneEvCol: string;
@@ -97,7 +100,7 @@ export interface IPropertyControlsTestWebPartProps {
 }
 
 export interface INewEvent {
-  id: number;
+  id?: number;
   title: string;
   description: string;
   category: string;
@@ -112,4 +115,16 @@ export interface IEditEvent {
   category: any;
   startDate: any;
   dueDate: any;
+}
+
+export interface IListItem {
+  Id: number;
+  Title: string;
+  StartDate: Date;
+  EndDate: Date;
+  Description: string;
+  Category: string;
+  StartDay: number;
+  EndDay: number;
+  DueDate: Date;
 }

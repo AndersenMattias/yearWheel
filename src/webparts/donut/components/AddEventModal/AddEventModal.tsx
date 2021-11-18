@@ -27,10 +27,10 @@ import {
   IDropdownOption,
   IDropdownStyles,
 } from '@fluentui/react/lib/Dropdown';
-import { addToList } from '../DonutHandler';
+import { addToList, dateWithoutTime } from '../DonutHandler';
 import { PrimaryButton } from '@microsoft/office-ui-fabric-react-bundle';
 
-export const AddEventModal = ({ setItems }: any): JSX.Element => {
+export const AddEventModal = ({ setItems, library }: any): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showError, setShowError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -39,7 +39,7 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
 
   const [selectedCategory, setSelectedcategory] = useState<IDropdownOption>();
   const [input, setInput] = useState<INewEvent>({
-    id: 1,
+    id: 0,
     title: '',
     description: '',
     category: '',
@@ -79,7 +79,7 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
     }
   }, [input.title, input.description, input.category, input.startDate]);
 
-  const onHandleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onHandleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (
@@ -97,6 +97,9 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
     } else if (input.description.length < 5) {
       setErrorMessage('Beskrivningen måste vara längre än fem tecken.');
       setShowError(true);
+    } else if (input.startDate > input.dueDate) {
+      setErrorMessage('aja baja.');
+      setShowError(true);
     } else if (
       input.title &&
       input.description &&
@@ -105,21 +108,23 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
       input.dueDate
     ) {
       try {
-        const newEvent = {
-          Id: 1,
-          Title: input.title,
-          Description: input.description,
-          Category: selectedCategory.text,
-          StartDate: input.startDate,
-          DueDate: input.dueDate,
-        };
-        addToList(
+        let returnInfo = await addToList(
+          library,
           input.title,
           input.description,
           selectedCategory.text,
           input.startDate,
           input.dueDate
         );
+
+        const newEvent = {
+          Id: returnInfo.data.Id,
+          Title: input.title,
+          Description: input.description,
+          Category: selectedCategory.text,
+          StartDate: dateWithoutTime(input.startDate),
+          DueDate: dateWithoutTime(input.dueDate),
+        };
 
         setItems((prev) => [...prev, newEvent]);
 
@@ -210,13 +215,10 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
             />
             <Label>Välj startdatum</Label>
             <DatePicker
-              placeholder={input.startDate}
-              // value={updatedEvent.startDate}
               ariaLabel='Välj ett datum'
               // DatePicker uses English strings by default. For localized apps, you must override this prop.
               strings={defaultDatePickerStrings}
               onSelectDate={(value) => {
-                console.log('value', value);
                 setInput((prev) => ({
                   ...prev,
                   startDate: value,
@@ -225,11 +227,9 @@ export const AddEventModal = ({ setItems }: any): JSX.Element => {
             />
             <Label>Välj slutdatum</Label>
             <DatePicker
-              // value={updatedEvent.dueDate}
               ariaLabel='Välj ett datum'
               strings={defaultDatePickerStrings}
               onSelectDate={(value) => {
-                console.log(value);
                 setInput((prev) => ({
                   ...prev,
                   dueDate: value,

@@ -50,8 +50,17 @@
   }
 
   .btnsEvContainer {
+    display: flex;
     padding-left: 2rem;
     padding-top: 0.5rem;
+  }
+
+  .btnsEvent {
+    margin: 0.5em;
+  }
+
+  .btnsEvContainerModal {
+    display: flex;
   }
 
   .modalContainer {

@@ -121,7 +121,6 @@ export const EventModal = ({
     } catch (e) {
       console.log(e);
     }
-    console.log('raderar');
     setIsModalOpen(false);
   };
 
@@ -137,9 +136,9 @@ export const EventModal = ({
         {!editMode && (
           <div className={styles.eventHeader}>
             <div>
-              <h4 id={titleId} style={{ paddingLeft: '1rem' }}>
+              <h2 id={titleId} style={{ paddingLeft: '1rem' }}>
                 {eventData.Title}
-              </h4>
+              </h2>
             </div>
             <div>
               <IconButton
@@ -160,14 +159,16 @@ export const EventModal = ({
                 <p>{eventData.StartDate + ' - ' + eventData.DueDate}</p>
               </div>
             </div>
-            <div className={styles.editEventBtn}>
-              <PrimaryButton
-                text='Redigera'
-                onClick={() => setEditMode(!editMode)}
-              />
-            </div>
-            <div className={styles.editEventBtn}>
-              <PrimaryButton text='Radera' onClick={onDeleteEvent} />
+            <div className={styles.btnsEvContainerModal}>
+              <div className={styles.editEventBtn}>
+                <PrimaryButton
+                  text='Redigera'
+                  onClick={() => setEditMode(!editMode)}
+                />
+              </div>
+              <div className={styles.editEventBtn}>
+                <DefaultButton text='Radera' onClick={onDeleteEvent} />
+              </div>
             </div>
           </div>
         ) : (
@@ -181,6 +182,7 @@ export const EventModal = ({
                   onChange={(e, value) => {
                     setUpdatedEvent((prev) => ({ ...prev, title: value }));
                   }}
+                  maxLength={20}
                 />
                 <Label className={styles.eventLabel}>Beskrivning</Label>
                 <TextField
@@ -200,7 +202,6 @@ export const EventModal = ({
                     updatedEvent.category ? updatedEvent.category : undefined
                   }
                   // eslint-disable-next-line react/jsx-no-bind
-                  // onChange={onChange}
                   onChange={(e, value) => {
                     setUpdatedEvent((prev) => ({
                       ...prev,
@@ -241,11 +242,15 @@ export const EventModal = ({
                   }}
                 />
                 <div className={styles.btnsEvContainer}>
-                  <DefaultButton
-                    text='Avbryt'
-                    onClick={() => setEditMode(!editMode)}
-                  />
-                  <PrimaryButton text='Spara' onClick={onUpdateEvent} />
+                  <div className={styles.btnsEvent}>
+                    <DefaultButton
+                      text='Avbryt'
+                      onClick={() => setEditMode(!editMode)}
+                    />
+                  </div>
+                  <div className={styles.btnsEvent}>
+                    <PrimaryButton text='Spara' onClick={onUpdateEvent} />
+                  </div>
                 </div>
               </div>
             </div>

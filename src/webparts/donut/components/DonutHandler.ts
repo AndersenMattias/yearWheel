@@ -5,9 +5,9 @@ import '@pnp/sp/lists';
 import '@pnp/sp/items';
 import * as d3 from 'd3';
 import { v4 as uuid } from 'uuid';
+import { IListItem } from './interfaces/IDonut';
 
 const arc = d3.arc();
-let arcId = uuid();
 
 export const getDegreeFromDay = (dayOfYear) => (365 / 360) * dayOfYear;
 
@@ -91,14 +91,13 @@ export const createDonutCircle = (
     id: id,
   });
 };
+
 export const createEventArc = (
   startDay,
   endDay,
   arr,
-  innerRadius: number,
   outerRadius: number,
-  outerRad,
-  innerRad,
+  innerRadius: number,
   eventColour: string,
   title: string,
   id: number,
@@ -106,22 +105,61 @@ export const createEventArc = (
   arcEnd
 ) => {
   const arc = d3.arc();
-  const start = getDegreeFromDay(startDay) * (Math.PI / 180);
-  const end = getDegreeFromDay(endDay) * (Math.PI / 180);
-  return arr.push({
-    arcSvg: arc({
-      innerRadius: innerRadius,
+  let start = getDegreeFromDay(startDay) * (Math.PI / 180);
+  let end = getDegreeFromDay(endDay) * (Math.PI / 180);
+
+  // if (start > 1.5 && end < 5) {
+  if (
+    // (start < 4.1 && end < 4.8) ||
+    // (start > 1.5 && end < 5) ||
+    // (start > 1.6 && end > 1.5)
+    start > 1.5 &&
+    end < 5
+  ) {
+    return arr.push({
+      arcSvg: arc({
+        outerRadius: outerRadius,
+        innerRadius: innerRadius,
+        startAngle: end,
+        endAngle: start,
+      }),
+      // centroid: getCentroid(
+      //    innerRadius,
+      //    outerRadius,
+      //   start,
+      //   end
+      // ),
+      colour: eventColour,
+      title: title,
+      id: id,
+      startAngle: arcStart,
+      endAngle: arcEnd,
       outerRadius: outerRadius,
-      startAngle: start,
-      endAngle: end,
-    }),
-    centroid: getCentroid(innerRad, outerRad, start, end),
-    colour: eventColour,
-    title: title,
-    id: id,
-    startAngle: arcStart,
-    endAngle: arcEnd,
-  });
+      innerRadius: innerRadius,
+    });
+  } else {
+    return arr.push({
+      arcSvg: arc({
+        outerRadius: outerRadius,
+        innerRadius: innerRadius,
+        startAngle: start,
+        endAngle: end,
+      }),
+      // centroid: getCentroid(
+      //    innerRadius,
+      //    outerRadius,
+      //   start,
+      //   end
+      // ),
+      colour: eventColour,
+      title: title,
+      id: id,
+      startAngle: arcStart,
+      endAngle: arcEnd,
+      outerRadius: outerRadius,
+      innerRadius: innerRadius,
+    });
+  }
 };
 
 export const addWheeldata = (
@@ -145,21 +183,20 @@ export const addWheeldata = (
 };
 
 export const addToList = async (
+  library,
   title: string,
   description: string,
   category: string,
   startDate: string,
   endDate: string
 ) => {
-  const iar: IItemAddResult = await sp.web.lists
-    .getByTitle('EventPlanner')
-    .items.add({
-      Title: title,
-      Description: description,
-      Category: category,
-      StartDate: startDate,
-      DueDate: endDate,
-    });
+  const iar: IItemAddResult = await sp.web.lists.getByTitle(library).items.add({
+    Title: title,
+    Description: description,
+    Category: category,
+    StartDate: startDate,
+    DueDate: endDate,
+  });
 
   return iar;
 };
@@ -235,47 +272,70 @@ export const drawText = (arr: any[], rotate: number, name: string, svgEl) => {
   });
 };
 
-// create label on each arc
-export const drawArcLabels = (arr: any[], svgEl) => {
-  arr.forEach((label, index) => {
-    svgEl
-      .append('g')
-      .attr('id', `arcLabelGroupLower${label.id}`)
-      .append('path')
-      .attr('d', label.arcSvg)
-      .attr('id', `labelArcElementLower${label.id}`)
-      .attr('transform', 'translate(500,500)')
-      .style('fill', 'none');
+// render text on each Event
+export const renderEventText = (
+  svgEl,
+  index: number,
+  event,
+  data: IListItem,
+  xVal: number,
+  // yVal: number,
+  dyVal: number
+) => {
+  svgEl
+    .append('g')
+    .attr('id', `arcLabel${data.Id}`)
+    .append('path')
+    .attr('id', 'tmpArc')
+    // .attr('stroke-width', '1px')
+    // .attr('stroke-linejoin', 'round')
+    // .attr('stroke', 'black')
+    .attr('d', event.arcSvg)
+    .attr('id', `arcEventElement${index}`)
 
-    let text = svgEl
-      .selectAll(`#arcLabelGroupLower${label.id}`)
-      .append('g')
-      .attr('id', 'arcLabelText')
-      .append('text')
-      .attr('x', label.coords.x)
-      .attr('y', label.coords.y)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '13px')
-      .attr('font-family', 'sans-serif')
-      // .text(circleTitle)
-      // .attr(
-      //   'transform',
-      //   `rotate(${rotate + (360 / arr.length) * (arr.length - index)}, ${
-      //     label.coords.x
-      //   }, ${label.coords.y})`
-      // );
-      .attr('dy', 12);
+    .attr('transform', `translate(500,500)`)
+    .style('fill', event.colour);
 
+  let text = svgEl
+    .selectAll(`#arcLabel${data.Id}`)
+    .append('g')
+    .attr('id', 'textGroup')
+    .append('text')
+    .style('font', `1.5em 'Rubik`)
+    .style('fill', 'black')
+    .attr('x', xVal)
+    // .attr('y', yVal)
+    .attr('dy', dyVal);
+
+  let diff = data.EndDay - data.StartDay;
+
+  let circumference: number = 2 * Math.PI * event.innerRadius;
+  let width = (diff / 360) * circumference;
+  let height = event.outerRadius - event.innerRadius;
+
+  if (width >= 10) {
     text
       .append('textPath')
-      .attr('startOffset', label.offSet)
-      .attr('font-size', '16px')
-      // .style('stroke', 'white')
-      // .style('stroke-width', 1)
-      .attr('font-family', 'sans-serif')
-      .attr('xlink:href', `#labelArcElementLower${label.id}`)
-      .text(label.title);
-  });
+      .attr('id', `textPath${data.Id}`)
+      // .attr('startOffset', offSet)
+      // .attr('text-anchor', textAnchor)
+      .attr('xlink:href', `#arcEventElement${index}`)
+      .text(data.Title);
+
+    let textLength = text.node().getComputedTextLength();
+    let numCharacters = data.Title.length;
+    let charLength = textLength / numCharacters;
+    let numCharactersToShow = Math.floor(width / charLength);
+
+    let actualLength =
+      numCharacters < numCharactersToShow ? numCharacters : numCharactersToShow;
+
+    let textPath = svgEl.select(`#textPath${data.Id}`);
+
+    if (textLength > (diff / 360) * circumference) {
+      textPath.text(data.Title.substr(0, actualLength));
+    }
+  }
 };
 
 export const populateMonthLabels = (
@@ -336,36 +396,54 @@ export const populateCategoryLabels = (
   }
 };
 
-export const populateArcLabels = (
+export const populateArcCategories = (
   arr,
-  divider: number,
-  innerRadius: number,
-  outerRadius: number,
-  start: number,
-  end: number,
-  category: string,
-  angel: number,
-  radius: number,
-  title: string,
-  offSet
+  circleTwoTitle: string,
+  circleThreeTitle: string,
+  circleFourTitle: string,
+  svgEl,
+  className: string,
+  classNameTwo: string,
+  xVal: number,
+  dyVal: number
 ) => {
-  for (let i = 0; i < 360; i += 360 / divider) {
-    const arc = d3.arc();
-    let id = uuid();
-    arr.push({
-      arcSvg: arc({
-        innerRadius: innerRadius,
-        outerRadius: outerRadius,
-        startAngle: start * (Math.PI / 180),
-        endAngle: end * (Math.PI / 180),
-      }),
-      category: category,
-      title: title,
-      id: id,
-      // title: i >= 90 && i <= 270 ? text : '',
-      angle: i,
-      coords: getXY(radius, i - angel, 500),
-      offSet: offSet,
-    });
-  }
+  arr.forEach((circle, index) => {
+    let circleTitle;
+
+    if (circle.category === 'Generell') {
+      circleTitle = circleTwoTitle;
+    } else if (circle.category === 'Kategori 1') {
+      circleTitle = circleThreeTitle;
+    } else if (circle.category === 'Kategori 2') {
+      // circleTitle = circleThreeTitle;
+    } else if (circle.category === 'Kategori 3') {
+      circleTitle = circleFourTitle;
+    }
+
+    svgEl
+      .append('g')
+      .attr('id', `${className}${index}`)
+      .append('path')
+      .attr('d', circle.arcSvg)
+      .attr('id', `${classNameTwo}${index + 1}`)
+      .attr('transform', 'translate(500,500)')
+      .style('fill', 'none');
+
+    let text = svgEl
+      .selectAll(`#${className}${index}`)
+      .append('g')
+      .attr('id', 'arcLabelText')
+      .append('text')
+      .style('fill', 'black')
+      .attr('x', xVal)
+      .attr('dy', dyVal);
+
+    text
+      .append('textPath')
+      .attr('startOffset', '22%')
+      .attr('font-size', '1.5em')
+      .attr('font-family', 'sans-serif')
+      .attr('xlink:href', `#${classNameTwo}${index + 1}`)
+      .text(circleTitle);
+  });
 };

@@ -4,16 +4,16 @@ import { v4 as uuid } from 'uuid';
 const arc = d3.arc();
 let id = uuid();
 
-export const hiddenLabelArcsUpper = [
+export const arcCatNamesUpperOne = [
   {
     arcSvg: arc({
-      innerRadius: 405,
-      outerRadius: 390,
+      outerRadius: 405,
+      innerRadius: 390,
       startAngle: 0 * (Math.PI / 180),
       endAngle: 90 * (Math.PI / 180),
     }),
-    innerRadius: 404,
-    outerRadius: 389,
+    innerRadius: 405,
+    outerRadius: 390,
     category: 'Generell',
     id: id,
     startAngle: 0,
@@ -21,27 +21,30 @@ export const hiddenLabelArcsUpper = [
   },
   {
     arcSvg: arc({
-      innerRadius: 405,
-      outerRadius: 390,
+      outerRadius: 405,
+      innerRadius: 390,
       startAngle: 270 * (Math.PI / 180),
       endAngle: 360 * (Math.PI / 180),
     }),
-    innerRadius: 404,
-    outerRadius: 389,
+    outerRadius: 405,
+    innerRadius: 390,
     category: 'Generell',
     id: id,
     startAngle: 270,
     endAngle: 360,
   },
+];
+
+export const arcCatNamesUpperTwo = [
   {
     arcSvg: arc({
-      innerRadius: 317,
-      outerRadius: 300,
+      outerRadius: 317,
+      innerRadius: 300,
       startAngle: 0 * (Math.PI / 180),
       endAngle: 90 * (Math.PI / 180),
     }),
-    innerRadius: 316,
-    outerRadius: 301,
+    outerRadius: 300,
+    innerRadius: 317,
     category: 'Kategori 1',
     id: id,
     startAngle: 0,
@@ -49,58 +52,29 @@ export const hiddenLabelArcsUpper = [
   },
   {
     arcSvg: arc({
-      innerRadius: 317,
-      outerRadius: 300,
+      outerRadius: 317,
+      innerRadius: 300,
       startAngle: 270 * (Math.PI / 180),
       endAngle: 360 * (Math.PI / 180),
     }),
-    innerRadius: 316,
-    outerRadius: 301,
+    outerRadius: 300,
+    innerRadius: 317,
     category: 'Kategori 1',
     id: id,
     startAngle: 270,
     endAngle: 360,
   },
-
+];
+export const arcCatNamesUpperThree = [
   {
     arcSvg: arc({
-      innerRadius: 317,
-      outerRadius: 300,
-      startAngle: 0 * (Math.PI / 180),
-      endAngle: 90 * (Math.PI / 180),
-    }),
-    innerRadius: 316,
-    outerRadius: 301,
-    category: 'Kategori 2',
-    id: id,
-    startAngle: 0,
-    endAngle: 90,
-  },
-
-  {
-    arcSvg: arc({
-      innerRadius: 317,
-      outerRadius: 300,
-      startAngle: 270 * (Math.PI / 180),
-      endAngle: 360 * (Math.PI / 180),
-    }),
-    innerRadius: 316,
-    outerRadius: 301,
-    category: 'Kategori 2',
-    id: id,
-    startAngle: 270,
-    endAngle: 360,
-  },
-
-  {
-    arcSvg: arc({
-      innerRadius: 223,
       outerRadius: 240,
+      innerRadius: 223,
       startAngle: 0 * (Math.PI / 180),
       endAngle: 90 * (Math.PI / 180),
     }),
-    innerRadius: 153,
-    outerRadius: 389,
+    outerRadius: 240,
+    innerRadius: 223,
     category: 'Kategori 3',
     id: id,
     startAngle: 0,
@@ -108,154 +82,179 @@ export const hiddenLabelArcsUpper = [
   },
   {
     arcSvg: arc({
-      innerRadius: 223,
       outerRadius: 240,
+      innerRadius: 223,
       startAngle: 270 * (Math.PI / 180),
       endAngle: 360 * (Math.PI / 180),
     }),
-    innerRadius: 153,
-    outerRadius: 389,
+    outerRadius: 240,
+    innerRadius: 223,
+    category: 'Kategori 3',
+    id: id,
+    startAngle: 270,
+    endAngle: 360,
+  },
+
+  {
+    arcSvg: arc({
+      outerRadius: 240,
+      innerRadius: 223,
+      startAngle: 0 * (Math.PI / 180),
+      endAngle: 90 * (Math.PI / 180),
+    }),
+    outerRadius: 240,
+    innerRadius: 223,
+    category: 'Kategori 3',
+    id: id,
+    startAngle: 0,
+    endAngle: 90,
+  },
+  {
+    arcSvg: arc({
+      outerRadius: 240,
+      innerRadius: 223,
+      startAngle: 270 * (Math.PI / 180),
+      endAngle: 360 * (Math.PI / 180),
+    }),
+    outerRadius: 240,
+    innerRadius: 223,
     category: 'Kategori 3',
     id: id,
     startAngle: 270,
     endAngle: 360,
   },
 ];
-
-export const hiddenLabelArcsLowerOne = [
+export const arcCatNamesLowerOne = [
   {
     arcSvg: arc({
-      innerRadius: 405,
-      outerRadius: 390,
-      startAngle: 180 * (Math.PI / 180),
-      endAngle: 270 * (Math.PI / 180),
-    }),
-    innerRadius: 404,
-    outerRadius: 389,
-    category: 'Generell',
-    id: id,
-    startAngle: 180,
-    endAngle: 270,
-  },
-  {
-    arcSvg: arc({
-      innerRadius: 405,
-      outerRadius: 390,
+      outerRadius: 405,
+      innerRadius: 390,
       startAngle: 270 * (Math.PI / 180),
-      endAngle: 360 * (Math.PI / 180),
-    }),
-    innerRadius: 404,
-    outerRadius: 389,
-    category: 'Generell',
-    id: id,
-    startAngle: 270,
-    endAngle: 360,
-  },
-];
-
-export const hiddenLabelArcsLowerTwo = [
-  {
-    arcSvg: arc({
-      innerRadius: 317,
-      outerRadius: 300,
-      startAngle: 180 * (Math.PI / 180),
-      endAngle: 270 * (Math.PI / 180),
-    }),
-    innerRadius: 316,
-    outerRadius: 301,
-    category: 'Kategori 1',
-    id: id,
-    startAngle: 180,
-    endAngle: 270,
-  },
-  {
-    arcSvg: arc({
-      innerRadius: 317,
-      outerRadius: 300,
-      startAngle: 270 * (Math.PI / 180),
-      endAngle: 360 * (Math.PI / 180),
-    }),
-    innerRadius: 316,
-    outerRadius: 301,
-    category: 'Kategori 1',
-    id: id,
-    startAngle: 270,
-    endAngle: 360,
-  },
-];
-
-export const hiddenLabelArcsLowerThree = [
-  {
-    arcSvg: arc({
-      innerRadius: 317,
-      outerRadius: 300,
-      startAngle: 90 * (Math.PI / 180),
       endAngle: 180 * (Math.PI / 180),
     }),
-    innerRadius: 316,
-    outerRadius: 301,
-    category: 'Kategori 2',
+    innerRadius: 405,
+    outerRadius: 390,
+    category: 'Generell',
     id: id,
-    startAngle: 90,
+    startAngle: 270,
     endAngle: 180,
   },
   {
     arcSvg: arc({
-      innerRadius: 317,
-      outerRadius: 300,
+      outerRadius: 405,
+      innerRadius: 390,
       startAngle: 180 * (Math.PI / 180),
-      endAngle: 270 * (Math.PI / 180),
+      endAngle: 90 * (Math.PI / 180),
     }),
-    innerRadius: 316,
-    outerRadius: 301,
-    category: 'Kategori 2',
+    outerRadius: 405,
+    innerRadius: 390,
+    category: 'Generell',
     id: id,
     startAngle: 180,
-    endAngle: 270,
+    endAngle: 90,
   },
 ];
 
-export const hiddenLabelArcsLowerFour = [
+export const arcCatNamesLowerTwo = [
   {
     arcSvg: arc({
-      innerRadius: 223,
-      outerRadius: 240,
-      startAngle: 180 * (Math.PI / 180),
-      endAngle: 270 * (Math.PI / 180),
+      outerRadius: 317,
+      innerRadius: 300,
+      startAngle: 270 * (Math.PI / 180),
+      endAngle: 180 * (Math.PI / 180),
     }),
-    innerRadius: 153,
-    outerRadius: 389,
-    category: 'Kategori 3',
+    outerRadius: 300,
+    innerRadius: 317,
+    category: 'Kategori 1',
     id: id,
-    startAngle: 180,
-    endAngle: 270,
+    startAngle: 270,
+    endAngle: 180,
   },
   {
     arcSvg: arc({
-      innerRadius: 223,
-      outerRadius: 240,
-      startAngle: 270 * (Math.PI / 180),
-      endAngle: 360 * (Math.PI / 180),
+      outerRadius: 317,
+      innerRadius: 300,
+      startAngle: 180 * (Math.PI / 180),
+      endAngle: 90 * (Math.PI / 180),
     }),
-    innerRadius: 153,
-    outerRadius: 389,
+    outerRadius: 300,
+    innerRadius: 317,
+    category: 'Kategori 1',
+    id: id,
+    startAngle: 180,
+    endAngle: 90,
+  },
+];
+export const arcCatNamesLowerThree = [
+  {
+    arcSvg: arc({
+      outerRadius: 240,
+      innerRadius: 223,
+      startAngle: 270 * (Math.PI / 180),
+      endAngle: 180 * (Math.PI / 180),
+    }),
+    outerRadius: 240,
+    innerRadius: 223,
     category: 'Kategori 3',
     id: id,
     startAngle: 270,
-    endAngle: 360,
+    endAngle: 180,
+  },
+  {
+    arcSvg: arc({
+      outerRadius: 240,
+      innerRadius: 223,
+      startAngle: 180 * (Math.PI / 180),
+      endAngle: 90 * (Math.PI / 180),
+    }),
+    outerRadius: 240,
+    innerRadius: 223,
+    category: 'Kategori 3',
+    id: id,
+    startAngle: 180,
+    endAngle: 90,
+  },
+
+  {
+    arcSvg: arc({
+      outerRadius: 240,
+      innerRadius: 223,
+      startAngle: 270 * (Math.PI / 180),
+      endAngle: 180 * (Math.PI / 180),
+    }),
+    outerRadius: 240,
+    innerRadius: 223,
+    category: 'Kategori 3',
+    id: id,
+    startAngle: 270,
+    endAngle: 180,
+  },
+  {
+    arcSvg: arc({
+      outerRadius: 240,
+      innerRadius: 223,
+      startAngle: 180 * (Math.PI / 180),
+      endAngle: 90 * (Math.PI / 180),
+    }),
+    outerRadius: 240,
+    innerRadius: 223,
+    category: 'Kategori 3',
+    id: id,
+    startAngle: 180,
+    endAngle: 90,
   },
 ];
 
 export const donutWheelData = [
   {
     arcSvg: arc({
-      innerRadius: 405,
       outerRadius: 470,
+      innerRadius: 410,
       startAngle: 0 * (Math.PI / 180),
       endAngle: 360 * (Math.PI / 180),
     }),
-    innerRadius: 405,
     outerRadius: 470,
+    innerRadius: 410,
     category: 'Generell',
     id: id,
     startAngle: 0,
@@ -263,13 +262,13 @@ export const donutWheelData = [
   },
   {
     arcSvg: arc({
-      innerRadius: 390,
-      outerRadius: 317,
+      outerRadius: 390,
+      innerRadius: 330,
       startAngle: 0 * (Math.PI / 180),
       endAngle: 360 * (Math.PI / 180),
     }),
-    innerRadius: 390,
-    outerRadius: 317,
+    outerRadius: 390,
+    innerRadius: 330,
     category: 'Kategori 1',
     id: id,
     startAngle: 0,
@@ -277,13 +276,13 @@ export const donutWheelData = [
   },
   {
     arcSvg: arc({
-      innerRadius: 300,
-      outerRadius: 240,
+      outerRadius: 300,
+      innerRadius: 240,
       startAngle: 0 * (Math.PI / 180),
       endAngle: 360 * (Math.PI / 180),
     }),
-    innerRadius: 300,
-    outerRadius: 240,
+    outerRadius: 300,
+    innerRadius: 240,
     category: 'Kategori 2',
     id: id,
     startAngle: 0,
@@ -291,13 +290,13 @@ export const donutWheelData = [
   },
   {
     arcSvg: arc({
-      innerRadius: 224,
-      outerRadius: 154,
+      outerRadius: 220,
+      innerRadius: 160,
       startAngle: 0 * (Math.PI / 180),
       endAngle: 360 * (Math.PI / 180),
     }),
-    innerRadius: 224,
-    outerRadius: 154,
+    outerRadius: 220,
+    innerRadius: 160,
     category: 'Kategori 3',
     id: id,
     startAngle: 0,
@@ -336,7 +335,7 @@ export const datesLabelUpper = [
   '7-13',
   '14-20',
   '21-27',
-  '8-31',
+  '28-31',
   '1-5',
   '6-12',
   '13-19',

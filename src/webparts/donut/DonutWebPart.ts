@@ -24,7 +24,12 @@ import {
   PropertyPaneTextField,
 } from '@microsoft/sp-property-pane';
 
+import { sp } from '@pnp/sp';
+import '@pnp/sp/webs';
+import '@pnp/sp/lists';
+
 export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartProps> {
+  private libraries: any;
   public render(): void {
     const element: React.ReactElement<IDonutProps> = React.createElement(
       Donut,
@@ -34,6 +39,7 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
         collectionData: this.properties.collectionData,
         eventListData: this.properties.eventListData,
         selectedCategory: this.properties.selectedCategory,
+        library: this.properties.selectedLibrary,
         circelOneTitle: this.properties.circelOneTitle,
         circleOneEvCol: this.properties.circleOneEvCol,
         circleOneColour: this.properties.circleOneColour,
@@ -48,12 +54,17 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
         circleFourEvCol: this.properties.circleFourEvCol,
       }
     );
+    this.getLibraries();
 
     ReactDom.render(element, this.domElement);
   }
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
+  }
+
+  public async getLibraries() {
+    this.libraries = await sp.web.lists.get();
   }
 
   // protected get dataVersion(): Version {
@@ -106,6 +117,12 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
+    let libraryOptions = [];
+    this.libraries.forEach((library) => {
+      if (!library.Hidden && library.BaseTemplate === 100) {
+        libraryOptions.push({ key: library.Title, text: library.Title });
+      }
+    });
     return {
       pages: [
         {
@@ -116,8 +133,13 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
             {
               groupName: strings.BasicGroupName,
               groupFields: [
+                PropertyPaneDropdown('selectedLibrary', {
+                  label: 'Välj lista',
+                  options: libraryOptions,
+                }),
                 PropertyPaneDropdown('selectedCategory', {
                   label: 'Kategori',
+
                   options: [
                     { key: 'circleOne', text: 'Cirkel 1' },
                     { key: 'circleTwo', text: 'Cirkel 2' },

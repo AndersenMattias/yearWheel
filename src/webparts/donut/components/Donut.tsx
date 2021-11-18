@@ -6,6 +6,7 @@ import { IDonutProps } from './interfaces/IDonut';
 const Donut = ({
   collectionData,
   selectedCategory,
+  library,
   circelOneTitle,
   circleOneColour,
   circleOneEvCol,
@@ -36,6 +37,7 @@ const Donut = ({
         circleFourEvCol={circleFourEvCol}
         collectionData={collectionData}
         selectedCategory={selectedCategory}
+        library={library}
       />
     </div>
   );
