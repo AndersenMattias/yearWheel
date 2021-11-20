@@ -126,5 +126,6 @@ export interface IListItem {
   Category: string;
   StartDay: number;
   EndDay: number;
-  DueDate: Date;
+  RenderUpper?: boolean;
+  DueDate?: Date;
 }

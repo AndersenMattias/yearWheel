@@ -30,7 +30,11 @@ import {
 import { addToList, dateWithoutTime } from '../DonutHandler';
 import { PrimaryButton } from '@microsoft/office-ui-fabric-react-bundle';
 
-export const AddEventModal = ({ setItems, library }: any): JSX.Element => {
+export const AddEventModal = ({
+  items,
+  setItems,
+  library,
+}: any): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showError, setShowError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -117,16 +121,60 @@ export const AddEventModal = ({ setItems, library }: any): JSX.Element => {
           input.dueDate
         );
 
-        const newEvent = {
-          Id: returnInfo.data.Id,
-          Title: input.title,
-          Description: input.description,
-          Category: selectedCategory.text,
-          StartDate: dateWithoutTime(input.startDate),
-          DueDate: dateWithoutTime(input.dueDate),
-        };
+        items.forEach((item) => {
+          let counter = 0;
 
-        setItems((prev) => [...prev, newEvent]);
+          items.forEach((listItem) => {
+            if (
+              item.Category == listItem.Category &&
+              item.Title != listItem.Title
+            ) {
+              //item between listitem
+              if (
+                item.StartDay >= listItem.StartDay &&
+                item.EndDay <= listItem.EndDay
+              ) {
+                counter++;
+              }
+              //listItem between item
+              else if (
+                item.StartDay <= listItem.StartDay &&
+                item.EndDay >= listItem.EndDay
+              ) {
+                counter++;
+              }
+              //item starts before, ends after listitem start
+              else if (
+                item.StartDay <= listItem.StartDay &&
+                item.EndDay >= listItem.StartDay
+              ) {
+                counter++;
+              }
+              //item ends after, starts during
+              else if (
+                item.StartDay >= listItem.StartDay &&
+                item.StartDay <= listItem.EndDay
+              ) {
+                counter++;
+              }
+            }
+
+            console.log(counter);
+          });
+
+          if (counter < 2) {
+            const newEvent = {
+              Id: returnInfo.data.Id,
+              Title: input.title,
+              Description: input.description,
+              Category: selectedCategory.text,
+              StartDate: dateWithoutTime(input.startDate),
+              DueDate: dateWithoutTime(input.dueDate),
+            };
+
+            setItems((prev) => [...prev, newEvent]);
+          }
+        });
 
         input.title = '';
         input.description = '';

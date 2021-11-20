@@ -18,7 +18,6 @@ import {
   arcCatNamesLowerThree,
 } from './DonutWheelData';
 
-import AddEventModal from './AddEventModal/AddEventModal';
 import { EventModal } from './EventModal/EventModal';
 
 import {
@@ -39,6 +38,8 @@ import { sp } from '@pnp/sp';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
+import { IDateTimeAxis_$type } from 'igniteui-react-charts';
+import { AddEventModal } from './AddEventModal/AddEventModal';
 
 const DonutWheel = ({
   library,
@@ -311,14 +312,14 @@ const DonutWheel = ({
             Category: item.Category,
             StartDay: getDayOfYear(startDate),
             EndDay: getDayOfYear(dueDate),
-            DueDate: item.DueDate,
           });
       });
 
-      mappedItems.map((item) => {
+      mappedItems.forEach((item) => {
         if (item.Category) {
           let wheel = donutWheelData.find((c) => c.category == item.Category);
           let eventColour;
+          let diff = 0;
 
           if (wheel.category === 'Generell') {
             eventColour = circleOneEvCol;
@@ -330,18 +331,73 @@ const DonutWheel = ({
             eventColour = circleFourEvCol;
           }
 
-          createEventArc(
-            item.StartDay,
-            item.EndDay,
-            eventArcs,
-            wheel.outerRadius,
-            wheel.innerRadius,
-            eventColour,
-            item.Title,
-            item.Id,
-            wheel.startAngle,
-            wheel.endAngle
-          );
+          mappedItems.forEach((listItem) => {
+            if (
+              item.Category == listItem.Category &&
+              item.Title != listItem.Title
+            ) {
+              //item between listitem
+              if (
+                item.StartDay >= listItem.StartDay &&
+                item.EndDay <= listItem.EndDay
+              ) {
+                diff = (wheel.outerRadius - wheel.innerRadius) / 2;
+                item.RenderUpper = true;
+              }
+              //listItem betwen item
+              else if (
+                item.StartDay <= listItem.StartDay &&
+                item.EndDay >= listItem.EndDay
+              ) {
+                diff = (wheel.outerRadius - wheel.innerRadius) / 2;
+                item.RenderUpper = false;
+              }
+              //item starts before, ends after listitem start
+              else if (
+                item.StartDay <= listItem.StartDay &&
+                item.EndDay >= listItem.StartDay
+              ) {
+                diff = (wheel.outerRadius - wheel.innerRadius) / 2;
+                item.RenderUpper = true;
+              }
+              //item ends after, starts during
+              else if (
+                item.StartDay >= listItem.StartDay &&
+                item.StartDay <= listItem.EndDay
+              ) {
+                diff = (wheel.outerRadius - wheel.innerRadius) / 2;
+                item.RenderUpper = false;
+              }
+            }
+          });
+
+          if (item.RenderUpper) {
+            createEventArc(
+              item.StartDay,
+              item.EndDay,
+              eventArcs,
+              wheel.outerRadius,
+              wheel.innerRadius + diff,
+              eventColour,
+              item.Title,
+              item.Id,
+              wheel.startAngle,
+              wheel.endAngle
+            );
+          } else {
+            createEventArc(
+              item.StartDay,
+              item.EndDay,
+              eventArcs,
+              wheel.outerRadius - diff,
+              wheel.innerRadius,
+              eventColour,
+              item.Title,
+              item.Id,
+              wheel.startAngle,
+              wheel.endAngle
+            );
+          }
         }
       });
 
@@ -349,13 +405,13 @@ const DonutWheel = ({
         let data = mappedItems.find((d) => d.Id == event.id);
 
         if (data.StartDay < 90 && data.StartDay > 0) {
-          renderEventText(svgEl, index, event, data, 5, 40);
+          renderEventText(svgEl, index, event, data, 5, 20);
         } else if (data.StartDay > 90 && data.StartDay < 180) {
-          renderEventText(svgEl, index, event, data, 5, -20);
+          renderEventText(svgEl, index, event, data, 5, -10);
         } else if (data.StartDay > 180 && data.StartDay < 270) {
-          renderEventText(svgEl, index, event, data, 5, -20);
+          renderEventText(svgEl, index, event, data, 5, -10);
         } else if (data.StartDay > 270 && data.StartDay < 365) {
-          renderEventText(svgEl, index, event, data, 5, 40);
+          renderEventText(svgEl, index, event, data, 5, 20);
         }
 
         svgEl
@@ -404,7 +460,7 @@ const DonutWheel = ({
 
   return (
     <>
-      <AddEventModal setItems={setItems} library={library} />
+      <AddEventModal items={items} setItems={setItems} library={library} />
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         {showDiv && <DivHover />}
         {isModalOpen && (

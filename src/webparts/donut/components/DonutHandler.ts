@@ -7,8 +7,6 @@ import * as d3 from 'd3';
 import { v4 as uuid } from 'uuid';
 import { IListItem } from './interfaces/IDonut';
 
-const arc = d3.arc();
-
 export const getDegreeFromDay = (dayOfYear) => (365 / 360) * dayOfYear;
 
 export const getDayOfYear = (date) => {
@@ -107,6 +105,7 @@ export const createEventArc = (
   const arc = d3.arc();
   let start = getDegreeFromDay(startDay) * (Math.PI / 180);
   let end = getDegreeFromDay(endDay) * (Math.PI / 180);
+  let diff = (outerRadius - innerRadius) / 2;
 
   // if (start > 1.5 && end < 5) {
   if (
