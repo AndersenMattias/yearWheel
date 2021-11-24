@@ -194,7 +194,7 @@ export const addToList = async (
     Description: description,
     Category: category,
     StartDate: startDate,
-    DueDate: endDate,
+    EndDate: endDate,
   });
 
   return iar;
@@ -369,7 +369,7 @@ export const populateDateLabels = (
   countRealIndex?: number
 ) => {
   let realIndex = countRealIndex;
-  for (let i = 0; i < 360; i += 360 / divider) {
+  for (let i = 0; i < 365; i += 365 / divider) {
     arr.push({
       title: labels[realIndex] || '',
       coords: getXY(radius, i - angel, 500),
@@ -444,5 +444,51 @@ export const populateArcCategories = (
       .attr('font-family', 'sans-serif')
       .attr('xlink:href', `#${classNameTwo}${index + 1}`)
       .text(circleTitle);
+  });
+};
+
+// svgEl
+// .append('g')
+// .attr('id', `wheelRingLabels${library}${circle.id}`)
+// .append('path')
+// .attr('d', circle.arcSvg)
+// .attr('id', `wheelRingLabelsArc${library}${circle.id}`)
+// .attr('transform', 'translate(500,500)')
+// .style('fill', circle.colour);
+
+export const populateArcDates = (
+  arr,
+  svgEl,
+  className: string,
+  classNameTwo: string,
+  xVal: number,
+  dyVal: number
+) => {
+  arr.forEach((circle, index) => {
+    svgEl
+      .append('g')
+      .attr('id', `${className}${index}`)
+      .append('path')
+      .attr('d', circle.arcSvg)
+      .attr('id', `${classNameTwo}${index + 1}`)
+      .attr('transform', 'translate(500,500)')
+      .style('fill', 'red');
+
+    let text = svgEl
+      .selectAll(`#${className}${index}`)
+      .append('g')
+      .attr('id', 'dateText')
+      .append('text')
+      .style('fill', 'black')
+      .attr('x', xVal)
+      .attr('dy', dyVal);
+
+    text
+      .append('textPath')
+      .attr('startOffset', '22%')
+      .attr('font-size', '1em')
+      .attr('font-family', 'sans-serif')
+      .attr('xlink:href', `#${classNameTwo}${index + 1}`)
+      .text('hej');
   });
 };

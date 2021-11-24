@@ -14,7 +14,7 @@ import {
   Label,
 } from '@fluentui/react';
 
-import { INewEvent } from '../interfaces/IDonut';
+import { IListItem, INewEvent } from '../interfaces/IDonut';
 
 import {
   DefaultButton,
@@ -30,11 +30,17 @@ import {
 import { addToList, dateWithoutTime } from '../DonutHandler';
 import { PrimaryButton } from '@microsoft/office-ui-fabric-react-bundle';
 
+export interface AddEventModalProps {
+  items: IListItem[];
+  setItems: React.Dispatch<React.SetStateAction<IListItem[]>>;
+  library: any;
+}
+
 export const AddEventModal = ({
   items,
   setItems,
   library,
-}: any): JSX.Element => {
+}: AddEventModalProps): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [showError, setShowError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>('');
@@ -48,7 +54,7 @@ export const AddEventModal = ({
     description: '',
     category: '',
     startDate: '',
-    dueDate: '',
+    endDate: '',
   });
 
   const categoryOptions = [
@@ -77,7 +83,7 @@ export const AddEventModal = ({
       input.title ||
       input.description ||
       input.startDate ||
-      input.dueDate !== ''
+      input.endDate !== ''
     ) {
       setShowError(false);
     }
@@ -91,7 +97,7 @@ export const AddEventModal = ({
       !input.description ||
       !selectedCategory ||
       !input.startDate ||
-      !input.dueDate
+      !input.endDate
     ) {
       setErrorMessage('Alla fält måste fyllas i, vänligen försök igen.');
       setShowError(true);
@@ -101,7 +107,7 @@ export const AddEventModal = ({
     } else if (input.description.length < 5) {
       setErrorMessage('Beskrivningen måste vara längre än fem tecken.');
       setShowError(true);
-    } else if (input.startDate > input.dueDate) {
+    } else if (input.startDate > input.endDate) {
       setErrorMessage('aja baja.');
       setShowError(true);
     } else if (
@@ -109,78 +115,75 @@ export const AddEventModal = ({
       input.description &&
       selectedCategory &&
       input.startDate &&
-      input.dueDate
+      input.endDate
     ) {
       try {
-        let returnInfo = await addToList(
-          library,
-          input.title,
-          input.description,
-          selectedCategory.text,
-          input.startDate,
-          input.dueDate
-        );
-
-        items.forEach((item) => {
-          let counter = 0;
-
-          items.forEach((listItem) => {
+        let counter = 0;
+        let itemStartDay = new Date(input.startDate);
+        let itemEndDay = new Date(input.endDate);
+        items.forEach((listItem) => {
+          let listItemStartDay = new Date(listItem.StartDate);
+          let listItemEndDay = new Date(listItem.EndDate);
+          if (
+            selectedCategory.text == listItem.Category &&
+            input.title != listItem.Title
+          ) {
+            //item between listitem
             if (
-              item.Category == listItem.Category &&
-              item.Title != listItem.Title
+              itemStartDay >= listItemStartDay &&
+              itemEndDay <= listItemEndDay
             ) {
-              //item between listitem
-              if (
-                item.StartDay >= listItem.StartDay &&
-                item.EndDay <= listItem.EndDay
-              ) {
-                counter++;
-              }
-              //listItem between item
-              else if (
-                item.StartDay <= listItem.StartDay &&
-                item.EndDay >= listItem.EndDay
-              ) {
-                counter++;
-              }
-              //item starts before, ends after listitem start
-              else if (
-                item.StartDay <= listItem.StartDay &&
-                item.EndDay >= listItem.StartDay
-              ) {
-                counter++;
-              }
-              //item ends after, starts during
-              else if (
-                item.StartDay >= listItem.StartDay &&
-                item.StartDay <= listItem.EndDay
-              ) {
-                counter++;
-              }
+              counter++;
             }
-
-            console.log(counter);
-          });
-
-          if (counter < 2) {
-            const newEvent = {
-              Id: returnInfo.data.Id,
-              Title: input.title,
-              Description: input.description,
-              Category: selectedCategory.text,
-              StartDate: dateWithoutTime(input.startDate),
-              DueDate: dateWithoutTime(input.dueDate),
-            };
-
-            setItems((prev) => [...prev, newEvent]);
+            //listItem between item
+            else if (
+              itemStartDay <= listItemStartDay &&
+              itemEndDay >= listItemEndDay
+            ) {
+              counter++;
+            }
+            //item starts before, ends after listitem start
+            else if (
+              itemStartDay <= listItemStartDay &&
+              itemEndDay >= listItemEndDay
+            ) {
+              counter++;
+            }
+            //item ends after, starts during
+            else if (
+              itemStartDay >= listItemStartDay &&
+              itemStartDay <= listItemEndDay
+            ) {
+              counter++;
+            }
           }
         });
+        if (counter < 2) {
+          let returnInfo = await addToList(
+            library,
+            input.title,
+            input.description,
+            selectedCategory.text,
+            input.startDate,
+            input.endDate
+          );
+          const newEvent: IListItem = {
+            Id: returnInfo.data.Id,
+            Title: input.title,
+            Description: input.description,
+            Category: selectedCategory.text,
+            StartDate: dateWithoutTime(input.startDate),
+            EndDate: dateWithoutTime(input.endDate),
+          };
+
+          setItems((prev) => [...prev, newEvent]);
+        }
 
         input.title = '';
         input.description = '';
         input.startDate = '';
         setSelectedcategory(null);
-        input.dueDate = '';
+        input.endDate = '';
         setErrorMessage('');
         setShowError(false);
       } catch (e) {
@@ -280,7 +283,7 @@ export const AddEventModal = ({
               onSelectDate={(value) => {
                 setInput((prev) => ({
                   ...prev,
-                  dueDate: value,
+                  endDate: value,
                 }));
               }}
             />

@@ -14,7 +14,7 @@ export interface IListObj {
   Category?: string;
   Description?: string;
   StartDate?: any;
-  DueDate?: any;
+  EndDate?: any;
 }
 
 export interface IListEvent {
@@ -105,7 +105,7 @@ export interface INewEvent {
   description: string;
   category: string;
   startDate: any;
-  dueDate: any;
+  endDate: any;
 }
 
 export interface IEditEvent {
@@ -114,18 +114,19 @@ export interface IEditEvent {
   description: string;
   category: any;
   startDate: any;
-  dueDate: any;
+  endDate: any;
 }
 
 export interface IListItem {
   Id: number;
   Title: string;
-  StartDate: Date;
-  EndDate: Date;
+  StartDate: any;
+  EndDate: any;
   Description: string;
   Category: string;
-  StartDay: number;
-  EndDay: number;
+  StartDay?: number;
+  EndDay?: number;
   RenderUpper?: boolean;
-  DueDate?: Date;
+  itemStartDay?: Date;
+  itemEndDay?: Date;
 }

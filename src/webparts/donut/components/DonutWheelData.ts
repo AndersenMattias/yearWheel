@@ -4,6 +4,35 @@ import { v4 as uuid } from 'uuid';
 const arc = d3.arc();
 let id = uuid();
 
+export const arcDatesUpper = [
+  {
+    arcSvg: arc({
+      outerRadius: 486,
+      innerRadius: 485,
+      startAngle: 0 * (Math.PI / 180),
+      endAngle: 90 * (Math.PI / 180),
+    }),
+    innerRadius: 486,
+    outerRadius: 485,
+    id: id,
+    startAngle: 0,
+    endAngle: 90,
+  },
+  {
+    arcSvg: arc({
+      outerRadius: 486,
+      innerRadius: 485,
+      startAngle: 270 * (Math.PI / 180),
+      endAngle: 360 * (Math.PI / 180),
+    }),
+    outerRadius: 486,
+    innerRadius: 485,
+    id: id,
+    startAngle: 270,
+    endAngle: 360,
+  },
+];
+
 export const arcCatNamesUpperOne = [
   {
     arcSvg: arc({
@@ -260,6 +289,7 @@ export const donutWheelData = [
     startAngle: 0,
     endAngle: 360,
   },
+
   {
     arcSvg: arc({
       outerRadius: 390,

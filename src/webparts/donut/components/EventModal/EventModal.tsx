@@ -47,7 +47,7 @@ export const EventModal = ({
     description: eventData.Description,
     category: eventData.Category,
     startDate: eventData.StartDate,
-    dueDate: eventData.DueDate,
+    endDate: eventData.EndDate,
   });
   // Use useId() to ensure that the IDs are unique on the page.
   // (It's also okay to use plain strings and manually ensure uniqueness.)
@@ -76,17 +76,18 @@ export const EventModal = ({
       Description: updatedEvent.description,
       Category: updatedEvent.category,
       StartDate: updatedEvent.startDate,
-      DueDate: updatedEvent.dueDate,
+      EndDate: updatedEvent.endDate,
     };
 
     try {
+      console.log(eventData);
       await list.items.getById(eventData.Id).update({
         Id: updatedEvent.id,
         Title: updatedEvent.title,
         Description: updatedEvent.description,
         Category: updatedEvent.category,
-        StartDate: dateWithoutTime(updatedEvent.startDate),
-        DueDate: dateWithoutTime(updatedEvent.dueDate),
+        StartDate: updatedEvent.startDate,
+        EndDate: updatedEvent.endDate,
       });
     } catch (e) {
       console.log(e);
@@ -109,7 +110,7 @@ export const EventModal = ({
       Description: updatedEvent.description,
       Category: updatedEvent.category,
       StartDate: dateWithoutTime(updatedEvent.startDate),
-      DueDate: dateWithoutTime(updatedEvent.dueDate),
+      EndDate: dateWithoutTime(updatedEvent.endDate),
     });
     setEditMode(!editMode);
   };
@@ -123,6 +124,8 @@ export const EventModal = ({
     }
     setIsModalOpen(false);
   };
+
+  console.log(eventData);
 
   return (
     <>
@@ -156,7 +159,7 @@ export const EventModal = ({
             <div className={styles.eventContainer}>
               <div>
                 <p>{eventData.Description}</p>
-                <p>{eventData.StartDate + ' - ' + eventData.DueDate}</p>
+                <p>{eventData.StartDate + ' - ' + eventData.EndDate}</p>
               </div>
             </div>
             <div className={styles.btnsEvContainerModal}>
@@ -223,7 +226,7 @@ export const EventModal = ({
                   onSelectDate={(value) => {
                     setUpdatedEvent((prev) => ({
                       ...prev,
-                      startDate: value.toLocaleDateString(),
+                      startDate: value.toLocaleDateString('sv-SE'),
                     }));
                   }}
                 />
@@ -231,13 +234,13 @@ export const EventModal = ({
                 <DatePicker
                   allowTextInput={true}
                   className={styles.eventInput}
-                  value={new Date(updatedEvent.dueDate)}
+                  value={new Date(updatedEvent.endDate)}
                   ariaLabel='Välj ett datum'
                   strings={defaultDatePickerStrings}
                   onSelectDate={(value) => {
                     setUpdatedEvent((prev) => ({
                       ...prev,
-                      dueDate: value.toLocaleDateString(),
+                      endDate: value.toLocaleDateString('sv-SE'),
                     }));
                   }}
                 />

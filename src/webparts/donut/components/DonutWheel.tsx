@@ -16,6 +16,7 @@ import {
   arcCatNamesLowerOne,
   arcCatNamesLowerTwo,
   arcCatNamesLowerThree,
+  arcDatesUpper,
 } from './DonutWheelData';
 
 import { EventModal } from './EventModal/EventModal';
@@ -30,6 +31,7 @@ import {
   createEventArc,
   populateArcCategories,
   renderEventText,
+  populateArcDates,
 } from './DonutHandler';
 
 import { IDonutWheelProps, IListObj, IListItem } from './interfaces/IDonut';
@@ -38,7 +40,6 @@ import { sp } from '@pnp/sp';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
-import { IDateTimeAxis_$type } from 'igniteui-react-charts';
 import { AddEventModal } from './AddEventModal/AddEventModal';
 
 const DonutWheel = ({
@@ -65,13 +66,15 @@ const DonutWheel = ({
   const [eventData, setEventData] = useState<IListObj>({});
 
   const ref = useRef();
-  const svgEl = d3.select(ref.current);
 
   let monthTextUpper = [];
   let monthTextLower = [];
 
   let datesUpper = [];
   let datesLower = [];
+
+  let datesUp = [];
+  let datesLow = [];
 
   let labelsforCircle = [];
 
@@ -93,6 +96,8 @@ const DonutWheel = ({
   }, [library]);
 
   useEffect(() => {
+    const svgEl = d3.select(ref.current);
+
     // prevents duplicate elements on load / re render
     svgEl.selectAll('*').remove();
 
@@ -108,8 +113,69 @@ const DonutWheel = ({
         .attr('d', circle.arcSvg)
         .attr('id', `wheelRingLabelsArc${library}${circle.id}`)
         .attr('transform', 'translate(500,500)')
-        .style('fill', circle.colour);
+        .style('fill', circle.colour)
+        .on('mouseleave', () => {
+          setShowDiv(false);
+        });
     });
+
+    // populateArcDates(arcDatesUpper, svgEl, 'tmptest', 'tmptestTwo', 0, 12);
+
+    let dayArray = [];
+    let oneJan = new Date(new Date().getFullYear(), 0, 1);
+
+    const getWeek = (inputDate) => {
+      let date = new Date(inputDate.getTime());
+      date.setHours(0, 0, 0, 0);
+      // Thursday in current week decides the year.
+      date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
+      // January 4 is always in week 1.
+      let week1 = new Date(date.getFullYear(), 0, 4);
+      // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+      return (
+        1 +
+        Math.round(
+          ((date.getTime() - week1.getTime()) / 86400000 -
+            3 +
+            ((week1.getDay() + 6) % 7)) /
+            7
+        )
+      );
+    };
+
+    console.log(getWeek(oneJan));
+
+    // function nextWeek(d) {
+    //   let today = new Date(d);
+    //   let nextweek = new Date(
+    //     today.getFullYear(),
+    //     today.getMonth(),
+    //     today.getDate() + 7
+    //   );
+    //   return nextweek;
+    // }
+
+    // function getMonday(d) {
+    //   d = new Date(d);
+    //   let day = d.getDay(),
+    //     diff = d.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
+    //   return new Date(d.setDate(diff));
+    // }
+
+    // let firstJan = new Date(new Date().getFullYear(), 0);
+    // let firstWeek =
+    //   firstJan.getWeek() != 1
+    //     ? nextWeek(getMonday(firstJan))
+    //     : getMonday(firstJan);
+    // console.log(firstJan);
+    // console.log(firstWeek);
+    // console.log(nextWeek(firstWeek));
+
+    // let currentWeek = firstWeek;
+    // while (currentWeek.getWeekYear() == new Date().getFullYear()) {
+    //   currentWeek = nextWeek(currentWeek);
+    //   console.log(currentWeek + ' ' + currentWeek.getWeek());
+    // }
 
     // renders upper titles for categories
     populateArcCategories(
@@ -211,6 +277,12 @@ const DonutWheel = ({
     populateMonthLabels(monthTextUpper, 24, 180, monthsLabelUpper, 488, 11);
     populateMonthLabels(monthTextLower, 24, 0, monthsLabelLower, 497, 11);
 
+    // if (newDate.getDay() <= 4) {
+    //   console.log('week 1');
+    // } else {
+    //   console.log('början');
+    // }
+
     // // Populate array with data - days
     populateDateLabels(datesUpper, 52, 0, datesLabelUpper, 473, 26);
     populateDateLabels(datesLower, 52, 180, datesLabelLower, 482, 26);
@@ -222,7 +294,7 @@ const DonutWheel = ({
     // Date labels
     drawText(datesUpper, 90, 'dateUpper', svgEl);
     drawText(datesLower, 90, 'dateLower', svgEl);
-  });
+  }, [labelsforCircle]);
 
   const renderEventText = (
     svgEl,
@@ -293,12 +365,13 @@ const DonutWheel = ({
   };
 
   useEffect(() => {
+    const svgEl = d3.select(ref.current);
     let currentYear = new Date().getFullYear();
     if (items.length >= 1) {
       let mappedItems: IListItem[] = [];
       items.forEach((item, index) => {
         let startDate = new Date(item.StartDate);
-        let dueDate = new Date(item.DueDate);
+        let dueDate = new Date(item.EndDate);
         if (
           startDate.getFullYear() == currentYear &&
           dueDate.getFullYear() == currentYear
@@ -306,8 +379,8 @@ const DonutWheel = ({
           mappedItems.push({
             Id: item.Id,
             Title: item.Title,
-            StartDate: dateWithoutTime(item.StartDate),
-            EndDate: dateWithoutTime(item.DueDate),
+            StartDate: new Date(item.StartDate),
+            EndDate: new Date(item.EndDate),
             Description: item.Description,
             Category: item.Category,
             StartDay: getDayOfYear(startDate),
@@ -409,7 +482,7 @@ const DonutWheel = ({
         } else if (data.StartDay > 90 && data.StartDay < 180) {
           renderEventText(svgEl, index, event, data, 5, -10);
         } else if (data.StartDay > 180 && data.StartDay < 270) {
-          renderEventText(svgEl, index, event, data, 5, -10);
+          renderEventText(svgEl, index, event, data, 5, -5);
         } else if (data.StartDay > 270 && data.StartDay < 365) {
           renderEventText(svgEl, index, event, data, 5, 20);
         }
@@ -419,7 +492,11 @@ const DonutWheel = ({
           .style('cursor', 'pointer')
           .on('mouseenter', (e) => {
             setTextValue(data.Title);
-            setDateValue(data.StartDate + ' - ' + data.EndDate);
+            setDateValue(
+              data.StartDate.toLocaleDateString() +
+                ' - ' +
+                data.EndDate.toLocaleDateString()
+            );
             setShowDiv(true);
           })
           .on('mouseleave', (e) => {
@@ -433,8 +510,8 @@ const DonutWheel = ({
               Title: data.Title,
               Description: data.Description,
               Category: data.Category,
-              StartDate: data.StartDate,
-              DueDate: data.EndDate,
+              StartDate: data.StartDate.toLocaleDateString('sv-SE'),
+              EndDate: data.EndDate.toLocaleDateString('sv-SE'),
             });
             setIsModalOpen(true);
           });
