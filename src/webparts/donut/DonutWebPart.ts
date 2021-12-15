@@ -11,6 +11,7 @@ import Donut from './components/Donut';
 import {
   IDonutProps,
   IDonutWebPartProps,
+  IPropertyControlsTestWebPartProps,
 } from './components/interfaces/IDonut';
 
 import '@pnp/sp/webs';
@@ -24,6 +25,11 @@ import {
   PropertyPaneTextField,
 } from '@microsoft/sp-property-pane';
 
+import {
+  PropertyFieldColorPicker,
+  PropertyFieldColorPickerStyle,
+} from '@pnp/spfx-property-controls/lib/PropertyFieldColorPicker';
+
 import { sp } from '@pnp/sp';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';
@@ -36,20 +42,17 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
       {
         description: this.properties.description,
         colour: this.properties.colour,
-        collectionData: this.properties.collectionData,
+        // collectionData: this.properties.collectionData,
         eventListData: this.properties.eventListData,
         selectedCategory: this.properties.selectedCategory,
         library: this.properties.selectedLibrary,
+        colorPicker: this.properties.colorPicker,
         circelOneTitle: this.properties.circelOneTitle,
         circleOneEvCol: this.properties.circleOneEvCol,
-        circleOneColour: this.properties.circleOneColour,
-        circleTwoColour: this.properties.circleTwoColour,
         circleTwoTitle: this.properties.circleTwoTitle,
         circleThreeTitle: this.properties.circleThreeTitle,
         circleTwoEvCol: this.properties.circleTwoEvCol,
         circleThreeEvCol: this.properties.circleThreeEvCol,
-        circleThreeColour: this.properties.circleThreeColour,
-        circleFourColour: this.properties.circleFourColour,
         circleFourTitle: this.properties.circleFourTitle,
         circleFourEvCol: this.properties.circleFourEvCol,
       }
@@ -92,25 +95,34 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
           maxLength: 20,
         }
       );
-      let circleColour: IPropertyPaneField<any> = PropertyPaneTextField(
-        this.properties.selectedCategory + 'Colour',
-        {
-          label: 'Välj färg',
-          maxLength: 10,
-        }
-      );
 
-      let circleEvColour: IPropertyPaneField<any> = PropertyPaneTextField(
+      const parseColorProp = {
+        circleOneEvCol: this.properties.circleOneEvCol,
+        circleTwoEvCol: this.properties.circleTwoEvCol,
+        circleThreeEvCol: this.properties.circleThreeEvCol,
+        circleFourEvCol: this.properties.circleFourEvCol,
+      };
+      let circleColourPick: IPropertyPaneField<any> = PropertyFieldColorPicker(
         this.properties.selectedCategory + 'EvCol',
         {
-          label: 'Välj färg för event',
-          maxLength: 10,
+          label: 'Color',
+          selectedColor:
+            parseColorProp[this.properties.selectedCategory + 'EvCol'], //this.properties.colorPicker,
+          onPropertyChange: this.onPropertyPaneFieldChanged,
+          properties: this.properties,
+          disabled: false,
+          debounce: 1000,
+          isHidden: false,
+          alphaSliderHidden: true,
+          style: PropertyFieldColorPickerStyle.Full,
+          iconName: 'Precipitation',
+          key: 'colorFieldId',
         }
       );
 
       groupFields.push(circleTitle);
-      groupFields.push(circleColour);
-      groupFields.push(circleEvColour);
+      // groupFields.push(circleEvColour);
+      groupFields.push(circleColourPick);
     }
 
     return group;
@@ -139,7 +151,6 @@ export default class DonutWebPart extends BaseClientSideWebPart<IDonutWebPartPro
                 }),
                 PropertyPaneDropdown('selectedCategory', {
                   label: 'Kategori',
-
                   options: [
                     { key: 'circleOne', text: 'Cirkel 1' },
                     { key: 'circleTwo', text: 'Cirkel 2' },

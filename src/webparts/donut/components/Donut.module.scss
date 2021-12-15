@@ -1,24 +1,61 @@
 @import '~office-ui-fabric-react/dist/sass/References.scss';
 
 .donut {
+  // font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
   .container {
     height: 100%;
     width: 100%;
     position: relative;
     /*    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1); */
-    background-color: red;
   }
+
+  .yearWheelContainer {
+    display: flex;
+    justify-content: center;
+  }
+
+  // AddEvent styling
+  .addEventContainer {
+    display: flex;
+    flex-direction: column;
+    padding-left: 2rem;
+    width: 300px;
+    height: 510px;
+  }
+
+  .addEventInput {
+    padding-right: 4em;
+  }
+
+  .btnsAddContainer {
+    display: flex;
+    padding-top: 0.5em;
+  }
+  //
 
   .eventHeader {
     display: flex;
     justify-content: space-between;
+    padding-top: 0.5em;
+    padding-left: 4em;
   }
 
   .eventContainer {
-    display: flex;
-    padding-left: 2rem;
+    padding-left: 4em;
     width: 450px;
     height: 200px;
+  }
+
+  .eventDateContainer {
+    display: flex;
+    height: 100px;
+    padding-top: 5em;
+    padding-right: 2em;
+  }
+
+  .calendarIcon {
+    font-size: large;
   }
 
   .editEventBtn {
@@ -46,7 +83,7 @@
   .iconButtonStyles {
     margin-left: auto;
     margin-top: 4px;
-    margin-right: 2px;
+    margin-right: 1em;
   }
 
   .btnsEvContainer {
@@ -64,20 +101,21 @@
   }
 
   .modalContainer {
-    position: absolute;
-    top: 50%;
-    left: 45%;
-    display: block;
-    padding: 2em;
-    width: 70%;
-    color: #f00;
-    background-color: rgb(231, 227, 227);
-    border-radius: 1em;
-    transform: translate(-50%, -50%);
+    // position: absolute;
+    // top: 50%;
+    // left: 45%;
+    // display: block;
+    // padding: 2em;
+    // width: 70%;
+    // color: #f00;
+    background-color: red;
+    // border-radius: 1em;
+    // transform: translate(-50%, -50%);
   }
 
   .toggleDivContainer {
     position: absolute;
+    // background-color: #f00;
     top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);

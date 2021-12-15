@@ -6,6 +6,7 @@ import '@pnp/sp/items';
 import * as d3 from 'd3';
 import { v4 as uuid } from 'uuid';
 import { IListItem } from './interfaces/IDonut';
+import { donutWheelData } from './DonutWheelData';
 
 export const getDegreeFromDay = (dayOfYear) => (365 / 360) * dayOfYear;
 
@@ -58,7 +59,7 @@ export const getCentroid = (innerRadius, outerRadius, startAngle, endAngle) => {
   return [Math.cos(a) * r, Math.sin(a) * r];
 };
 
-export const createDonutCircle = (
+export const createDateCircles = (
   arr,
   innerRadius: number,
   outerRadius: number,
@@ -107,14 +108,7 @@ export const createEventArc = (
   let end = getDegreeFromDay(endDay) * (Math.PI / 180);
   let diff = (outerRadius - innerRadius) / 2;
 
-  // if (start > 1.5 && end < 5) {
-  if (
-    // (start < 4.1 && end < 4.8) ||
-    // (start > 1.5 && end < 5) ||
-    // (start > 1.6 && end > 1.5)
-    start > 1.5 &&
-    end < 5
-  ) {
+  if (start > 1.5 && end < 5) {
     return arr.push({
       arcSvg: arc({
         outerRadius: outerRadius,
@@ -122,12 +116,7 @@ export const createEventArc = (
         startAngle: end,
         endAngle: start,
       }),
-      // centroid: getCentroid(
-      //    innerRadius,
-      //    outerRadius,
-      //   start,
-      //   end
-      // ),
+      centroid: getCentroid(innerRadius, outerRadius, start, end),
       colour: eventColour,
       title: title,
       id: id,
@@ -144,12 +133,7 @@ export const createEventArc = (
         startAngle: start,
         endAngle: end,
       }),
-      // centroid: getCentroid(
-      //    innerRadius,
-      //    outerRadius,
-      //   start,
-      //   end
-      // ),
+      centroid: getCentroid(innerRadius, outerRadius, start, end),
       colour: eventColour,
       title: title,
       id: id,
@@ -260,7 +244,7 @@ export const drawText = (arr: any[], rotate: number, name: string, svgEl) => {
       .attr('y', coord.coords.y)
       .attr('text-anchor', 'middle')
       .attr('font-size', '14px')
-      .attr('font-family', 'sans-serif')
+      .attr('font-family', 'Segoe UI')
       .text(coord.title)
       .attr(
         'transform',
@@ -274,51 +258,47 @@ export const drawText = (arr: any[], rotate: number, name: string, svgEl) => {
 // render text on each Event
 export const renderEventText = (
   svgEl,
+  library,
   index: number,
   event,
   data: IListItem,
   xVal: number,
-  // yVal: number,
   dyVal: number
 ) => {
-  svgEl
-    .append('g')
-    .attr('id', `arcLabel${data.Id}`)
-    .append('path')
-    .attr('id', 'tmpArc')
-    // .attr('stroke-width', '1px')
-    // .attr('stroke-linejoin', 'round')
-    // .attr('stroke', 'black')
-    .attr('d', event.arcSvg)
-    .attr('id', `arcEventElement${index}`)
-
-    .attr('transform', `translate(500,500)`)
-    .style('fill', event.colour);
-
-  let text = svgEl
-    .selectAll(`#arcLabel${data.Id}`)
-    .append('g')
-    .attr('id', 'textGroup')
-    .append('text')
-    .style('font', `1.5em 'Rubik`)
-    .style('fill', 'black')
-    .attr('x', xVal)
-    // .attr('y', yVal)
-    .attr('dy', dyVal);
-
   let diff = data.EndDay - data.StartDay;
 
   let circumference: number = 2 * Math.PI * event.innerRadius;
   let width = (diff / 360) * circumference;
-  let height = event.outerRadius - event.innerRadius;
+
+  svgEl
+    .append('g')
+    .attr('id', `arcLabel-${library}-${data.Id}`)
+    .append('path')
+    .attr('id', 'tmpArc')
+    .attr('stroke-width', '0.5px')
+    .attr('stroke-linejoin', 'round')
+    .attr('stroke', 'black')
+    .attr('d', event.arcSvg)
+    .attr('id', `arcEventElement-${library}-${index}`)
+
+    .attr('transform', `translate(500,500)`)
+    .style('fill', event.colour ? event.colour : '#0585fc');
+
+  let text = svgEl
+    .selectAll(`#arcLabel-${library}-${data.Id}`)
+    .append('g')
+    .attr('id', 'textGroup')
+    .append('text')
+    .style('font', `1.3em 'Segoe UI`)
+    .attr('x', xVal)
+    // .attr('y', yVal)
+    .attr('dy', dyVal);
 
   if (width >= 10) {
     text
       .append('textPath')
       .attr('id', `textPath${data.Id}`)
-      // .attr('startOffset', offSet)
-      // .attr('text-anchor', textAnchor)
-      .attr('xlink:href', `#arcEventElement${index}`)
+      .attr('xlink:href', `#arcEventElement-${library}-${index}`)
       .text(data.Title);
 
     let textLength = text.node().getComputedTextLength();
@@ -335,6 +315,47 @@ export const renderEventText = (
       textPath.text(data.Title.substr(0, actualLength));
     }
   }
+};
+
+export const populateDates = (
+  arr,
+  svgEl,
+  library,
+  className,
+  classNameTwo,
+  dyVal,
+  dates
+) => {
+  arr.forEach((circle, index) => {
+    svgEl
+      .append('g')
+      .attr('id', `wheelDateRing-${library}-${className}`)
+      .append('path')
+      .attr('d', circle.arcSvg)
+      .attr('id', `arcDateElement-${library}-${classNameTwo}`)
+
+      .attr('transform', `translate(500,500)`)
+      .style('fill', 'black');
+
+    let text = svgEl
+      .selectAll(`#wheelDateRing-${library}-${className}`)
+      .append('g')
+      .attr('id', 'textGroup')
+      .append('text')
+      .style('font', `0.9em 'Segoe UI`)
+      .style('fill', 'black')
+      .attr('font-weight', 400)
+      .attr('letter-spacing', '0.39em')
+      .attr('dx', 15)
+      // .attr('y', yVal)
+      .attr('dy', dyVal);
+
+    text
+      .append('textPath')
+      .attr('id', `textPath${circle.id}`)
+      .attr('xlink:href', `#arcDateElement-${library}-${classNameTwo}`)
+      .text(dates);
+  });
 };
 
 export const populateMonthLabels = (
@@ -360,24 +381,24 @@ export const populateMonthLabels = (
   }
 };
 
-export const populateDateLabels = (
-  arr,
-  divider: number,
-  angel: number,
-  labels: string[],
-  radius: number,
-  countRealIndex?: number
-) => {
-  let realIndex = countRealIndex;
-  for (let i = 0; i < 365; i += 365 / divider) {
-    arr.push({
-      title: labels[realIndex] || '',
-      coords: getXY(radius, i - angel, 500),
-      angle: i,
-    });
-    realIndex--;
-  }
-};
+// export const populateDateLabels = (
+//   arr,
+//   divider: number,
+//   angel: number,
+//   labels: string[],
+//   radius: number,
+//   countRealIndex?: number
+// ) => {
+//   let realIndex = countRealIndex;
+//   for (let i = 0; i < 365; i += 365 / divider) {
+//     arr.push({
+//       title: labels[realIndex] || '',
+//       coords: getXY(radius, i - angel, 500),
+//       angle: i,
+//     });
+//     realIndex--;
+//   }
+// };
 
 export const populateCategoryLabels = (
   arr,
@@ -441,54 +462,114 @@ export const populateArcCategories = (
       .append('textPath')
       .attr('startOffset', '22%')
       .attr('font-size', '1.5em')
-      .attr('font-family', 'sans-serif')
+      .attr('font-family', 'Segoe UI')
       .attr('xlink:href', `#${classNameTwo}${index + 1}`)
       .text(circleTitle);
   });
 };
 
-// svgEl
-// .append('g')
-// .attr('id', `wheelRingLabels${library}${circle.id}`)
-// .append('path')
-// .attr('d', circle.arcSvg)
-// .attr('id', `wheelRingLabelsArc${library}${circle.id}`)
-// .attr('transform', 'translate(500,500)')
-// .style('fill', circle.colour);
-
-export const populateArcDates = (
+// checks if event on same date, between, after etc
+export const onCreateEvent = (
   arr,
-  svgEl,
-  className: string,
-  classNameTwo: string,
-  xVal: number,
-  dyVal: number
+  arrTwo,
+  circleOneEvCol,
+  circleTwoEvCol,
+  circleThreeEvCol,
+  circleFourEvCol,
+  arcs
 ) => {
-  arr.forEach((circle, index) => {
-    svgEl
-      .append('g')
-      .attr('id', `${className}${index}`)
-      .append('path')
-      .attr('d', circle.arcSvg)
-      .attr('id', `${classNameTwo}${index + 1}`)
-      .attr('transform', 'translate(500,500)')
-      .style('fill', 'red');
+  arr.forEach((item) => {
+    if (item.Category) {
+      let wheel = donutWheelData.find((c) => c.category == item.Category);
+      let eventColour;
+      let diff = 0;
 
-    let text = svgEl
-      .selectAll(`#${className}${index}`)
-      .append('g')
-      .attr('id', 'dateText')
-      .append('text')
-      .style('fill', 'black')
-      .attr('x', xVal)
-      .attr('dy', dyVal);
+      if (wheel.category === 'Generell') {
+        eventColour = circleOneEvCol;
+      } else if (wheel.category === 'Kategori 1') {
+        eventColour = circleTwoEvCol;
+      } else if (wheel.category === 'Kategori 2') {
+        eventColour = circleThreeEvCol;
+      } else if (wheel.category === 'Kategori 3') {
+        eventColour = circleFourEvCol;
+      }
 
-    text
-      .append('textPath')
-      .attr('startOffset', '22%')
-      .attr('font-size', '1em')
-      .attr('font-family', 'sans-serif')
-      .attr('xlink:href', `#${classNameTwo}${index + 1}`)
-      .text('hej');
+      arrTwo.forEach((listItem) => {
+        if (
+          item.Category == listItem.Category &&
+          item.Title != listItem.Title
+        ) {
+          // item equal listItem
+          if (
+            item.StartDay == listItem.StartDay &&
+            item.EndDay == listItem.EndDay
+          ) {
+            // set renderUppe false
+            item.RenderUpper = item.Title > listItem.Title;
+            diff = (wheel.outerRadius - wheel.innerRadius) / 2;
+          }
+          //item between listitem
+          else if (
+            item.StartDay >= listItem.StartDay &&
+            item.EndDay <= listItem.EndDay
+          ) {
+            diff = (wheel.outerRadius - wheel.innerRadius) / 2;
+            item.RenderUpper = true;
+          }
+          //listItem betwen item
+          else if (
+            item.StartDay <= listItem.StartDay &&
+            item.EndDay >= listItem.EndDay
+          ) {
+            diff = (wheel.outerRadius - wheel.innerRadius) / 2;
+            item.RenderUpper = false;
+          }
+          //item starts before, ends after listitem start
+          else if (
+            item.StartDay <= listItem.StartDay &&
+            item.EndDay >= listItem.StartDay
+          ) {
+            diff = (wheel.outerRadius - wheel.innerRadius) / 2;
+            item.RenderUpper = true;
+          }
+          //item ends after, starts during
+          else if (
+            item.StartDay >= listItem.StartDay &&
+            item.StartDay <= listItem.EndDay
+          ) {
+            diff = (wheel.outerRadius - wheel.innerRadius) / 2;
+            item.RenderUpper = false;
+          }
+        }
+      });
+
+      if (item.RenderUpper) {
+        createEventArc(
+          item.StartDay,
+          item.EndDay,
+          arcs,
+          wheel.outerRadius,
+          wheel.innerRadius + diff,
+          eventColour,
+          item.Title,
+          item.Id,
+          wheel.startAngle,
+          wheel.endAngle
+        );
+      } else {
+        createEventArc(
+          item.StartDay,
+          item.EndDay,
+          arcs,
+          wheel.outerRadius - diff,
+          wheel.innerRadius,
+          eventColour,
+          item.Title,
+          item.Id,
+          wheel.startAngle,
+          wheel.endAngle
+        );
+      }
+    }
   });
 };

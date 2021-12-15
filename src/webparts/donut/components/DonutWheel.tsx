@@ -5,8 +5,6 @@ import styles from './Donut.module.scss';
 import { useRef, useEffect, useState } from 'react';
 
 import {
-  datesLabelUpper,
-  datesLabelLower,
   monthsLabelUpper,
   monthsLabelLower,
   donutWheelData,
@@ -16,22 +14,24 @@ import {
   arcCatNamesLowerOne,
   arcCatNamesLowerTwo,
   arcCatNamesLowerThree,
-  arcDatesUpper,
+  yearWheelDatesUpper,
+  yearWheelDatesLowerOne,
+  yearWheeldatesUpperTwo,
+  yearWheelDatesLowerTwo,
 } from './DonutWheelData';
 
 import { EventModal } from './EventModal/EventModal';
+import { AddEventModal } from './AddEventModal/AddEventModal';
 
 import {
   drawText,
   getDayOfYear,
-  dateWithoutTime,
   populateMonthLabels,
-  populateDateLabels,
-  createDonutCircle,
-  createEventArc,
+  createDateCircles,
   populateArcCategories,
   renderEventText,
-  populateArcDates,
+  onCreateEvent,
+  populateDates,
 } from './DonutHandler';
 
 import { IDonutWheelProps, IListObj, IListItem } from './interfaces/IDonut';
@@ -40,22 +40,20 @@ import { sp } from '@pnp/sp';
 import '@pnp/sp/webs';
 import '@pnp/sp/lists';
 import '@pnp/sp/items';
-import { AddEventModal } from './AddEventModal/AddEventModal';
+
+import { lighten } from 'polished';
+
+import { addDays } from 'date-fns';
 
 const DonutWheel = ({
   library,
-  selectedCategory,
   circelOneTitle,
-  circleOneColour,
   circleOneEvCol,
   circleTwoTitle,
-  circleTwoColour,
   circleTwoEvCol,
   circleThreeTitle,
-  circleThreeColour,
   circleThreeEvCol,
   circleFourTitle,
-  circleFourColour,
   circleFourEvCol,
 }: IDonutWheelProps): JSX.Element => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -69,12 +67,6 @@ const DonutWheel = ({
 
   let monthTextUpper = [];
   let monthTextLower = [];
-
-  let datesUpper = [];
-  let datesLower = [];
-
-  let datesUp = [];
-  let datesLow = [];
 
   let labelsforCircle = [];
 
@@ -101,81 +93,83 @@ const DonutWheel = ({
     // prevents duplicate elements on load / re render
     svgEl.selectAll('*').remove();
 
-    // creates black "circles" for months and dates
-    createDonutCircle(labelsforCircle, 499, 500, 499, 500, 0, 360, '#000');
-    createDonutCircle(labelsforCircle, 485, 486, 485, 486, 0, 360, '#000');
-
-    labelsforCircle.forEach((circle) => {
-      svgEl
-        .append('g')
-        .attr('id', `wheelRingLabels${library}${circle.id}`)
-        .append('path')
-        .attr('d', circle.arcSvg)
-        .attr('id', `wheelRingLabelsArc${library}${circle.id}`)
-        .attr('transform', 'translate(500,500)')
-        .style('fill', circle.colour)
-        .on('mouseleave', () => {
-          setShowDiv(false);
-        });
-    });
-
-    // populateArcDates(arcDatesUpper, svgEl, 'tmptest', 'tmptestTwo', 0, 12);
-
-    let dayArray = [];
     let oneJan = new Date(new Date().getFullYear(), 0, 1);
 
-    const getWeek = (inputDate) => {
-      let date = new Date(inputDate.getTime());
-      date.setHours(0, 0, 0, 0);
-      // Thursday in current week decides the year.
-      date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
-      // January 4 is always in week 1.
-      let week1 = new Date(date.getFullYear(), 0, 4);
-      // Adjust to Thursday in week 1 and count number of weeks from date to week1.
-      return (
-        1 +
-        Math.round(
-          ((date.getTime() - week1.getTime()) / 86400000 -
-            3 +
-            ((week1.getDay() + 6) % 7)) /
-            7
+    let firstDay = 1;
+    let lastDay = 8 - oneJan.getDay();
+    let datesArr = [];
+
+    // add dates for whole year, mon-sun
+    while (lastDay < 365) {
+      firstDay += lastDay - firstDay;
+      lastDay += 7;
+
+      datesArr
+        .push(
+          addDays(oneJan, firstDay).getDate() +
+            '-' +
+            addDays(oneJan, lastDay - 1).getDate()
         )
-      );
-    };
+        .toString();
+    }
 
-    console.log(getWeek(oneJan));
+    // create black "circle" for months
 
-    // function nextWeek(d) {
-    //   let today = new Date(d);
-    //   let nextweek = new Date(
-    //     today.getFullYear(),
-    //     today.getMonth(),
-    //     today.getDate() + 7
-    //   );
-    //   return nextweek;
-    // }
+    createDateCircles(labelsforCircle, 499, 500, 499, 500, 0, 360, '#000');
+    // createDateCircles(labelsforCircle, 485, 486, 485, 486, 0, 360, '#000');
 
-    // function getMonday(d) {
-    //   d = new Date(d);
-    //   let day = d.getDay(),
-    //     diff = d.getDate() - day + (day == 0 ? -6 : 1); // adjust when day is sunday
-    //   return new Date(d.setDate(diff));
-    // }
+    labelsforCircle.forEach((circle, index) => {
+      svgEl
+        .append('g')
+        .attr('id', `wheelRing-${library}-${index}`)
+        .append('path')
+        .attr('d', circle.arcSvg)
 
-    // let firstJan = new Date(new Date().getFullYear(), 0);
-    // let firstWeek =
-    //   firstJan.getWeek() != 1
-    //     ? nextWeek(getMonday(firstJan))
-    //     : getMonday(firstJan);
-    // console.log(firstJan);
-    // console.log(firstWeek);
-    // console.log(nextWeek(firstWeek));
+        .attr('transform', `translate(500,500)`)
+        .style('fill', 'black');
+    });
 
-    // let currentWeek = firstWeek;
-    // while (currentWeek.getWeekYear() == new Date().getFullYear()) {
-    //   currentWeek = nextWeek(currentWeek);
-    //   console.log(currentWeek + ' ' + currentWeek.getWeek());
-    // }
+    const q1 = datesArr.slice(0, 13).toString().replace(/,/g, ' ');
+    const q2 = datesArr.slice(13, 26).toString().replace(/,/g, ' ');
+    const q3 = datesArr.slice(26, 39).toString().replace(/,/g, ' ');
+    const q4 = datesArr.slice(39).toString().replace(/,/g, ' ');
+
+    populateDates(
+      yearWheelDatesUpper,
+      svgEl,
+      library,
+      'datesUpperOne',
+      'datesUpperOne',
+      13.5,
+      q1
+    );
+    populateDates(
+      yearWheeldatesUpperTwo,
+      svgEl,
+      library,
+      'datesUpperTwo',
+      'datesUpperTwo',
+      13.5,
+      q4
+    );
+    populateDates(
+      yearWheelDatesLowerOne,
+      svgEl,
+      library,
+      'datesLowerOne',
+      'datesLowerOne',
+      -3,
+      q3
+    );
+    populateDates(
+      yearWheelDatesLowerTwo,
+      svgEl,
+      library,
+      'datesLowerTwo',
+      'datesLowerTwo',
+      -3,
+      q2
+    );
 
     // renders upper titles for categories
     populateArcCategories(
@@ -254,13 +248,13 @@ const DonutWheel = ({
       let circleColour;
 
       if (circle.category === 'Generell') {
-        circleColour = circleOneColour;
-      } else if (circle.category === 'Kategori 1') {
-        circleColour = circleTwoColour;
-      } else if (circle.category === 'Kategori 2') {
-        circleColour = circleThreeColour;
-      } else if (circle.category === 'Kategori 3') {
-        circleColour = circleFourColour;
+        circleColour = lighten(0.2, circleOneEvCol ?? '#0585fc');
+      } else if (circle.category == 'Kategori 1') {
+        circleColour = lighten(0.2, circleTwoEvCol ?? '#0585fc');
+      } else if (circle.category == 'Kategori 2') {
+        circleColour = lighten(0.2, circleThreeEvCol ?? '#0585fc');
+      } else if (circle.category == 'Kategori 3') {
+        circleColour = lighten(0.2, circleFourEvCol ?? '#0585fc');
       }
 
       svgEl
@@ -270,99 +264,17 @@ const DonutWheel = ({
         .attr('d', circle.arcSvg)
         .attr('id', `wheelRingElement${library}${index}`)
         .attr('transform', 'translate(500,500)')
-        .style('fill', circleColour ? circleColour : '#edaa4c');
+        .style('fill', circleColour);
     });
 
     // Populate array with data - months
     populateMonthLabels(monthTextUpper, 24, 180, monthsLabelUpper, 488, 11);
     populateMonthLabels(monthTextLower, 24, 0, monthsLabelLower, 497, 11);
 
-    // if (newDate.getDay() <= 4) {
-    //   console.log('week 1');
-    // } else {
-    //   console.log('början');
-    // }
-
-    // // Populate array with data - days
-    populateDateLabels(datesUpper, 52, 0, datesLabelUpper, 473, 26);
-    populateDateLabels(datesLower, 52, 180, datesLabelLower, 482, 26);
-
     // Month labels
     drawText(monthTextUpper, -105, 'monthUpper', svgEl);
     drawText(monthTextLower, -105, 'monthLower', svgEl);
-
-    // Date labels
-    drawText(datesUpper, 90, 'dateUpper', svgEl);
-    drawText(datesLower, 90, 'dateLower', svgEl);
   }, [labelsforCircle]);
-
-  const renderEventText = (
-    svgEl,
-    index: number,
-    event,
-    data: IListItem,
-    xVal: number,
-    // yVal: number,
-    dyVal: number
-  ) => {
-    svgEl
-      .append('g')
-      .attr('id', `arcLabel${library}${data.Id}`)
-      .append('path')
-      .attr('id', 'tmpArc')
-      .attr('stroke-width', '0.5px')
-      .attr('stroke-linejoin', 'round')
-      .attr('stroke', 'black')
-      .attr('d', event.arcSvg)
-      .attr('id', `arcEventElement${library}${index}`)
-
-      .attr('transform', `translate(500,500)`)
-      .style('fill', event.colour ? event.colour : '#de8d1b');
-
-    let text = svgEl
-      .selectAll(`#arcLabel${library}${data.Id}`)
-      .append('g')
-      .attr('id', 'textGroup')
-      .append('text')
-      .style('font', `1.5em 'Rubik`)
-      .style('fill', 'black')
-      .attr('font-weight', 400)
-      .attr('x', xVal)
-      // .attr('y', yVal)
-      .attr('dy', dyVal);
-
-    let diff = data.EndDay - data.StartDay;
-
-    let circumference: number = 2 * Math.PI * event.innerRadius;
-    let width = (diff / 360) * circumference;
-    let height = event.outerRadius - event.innerRadius;
-
-    if (width >= 10) {
-      text
-        .append('textPath')
-        .attr('id', `textPath${data.Id}`)
-        // .attr('startOffset', offSet)
-        // .attr('text-anchor', textAnchor)
-        .attr('xlink:href', `#arcEventElement${library}${index}`)
-        .text(data.Title);
-
-      let textLength = text.node().getComputedTextLength();
-      let numCharacters = data.Title.length;
-      let charLength = textLength / numCharacters;
-      let numCharactersToShow = Math.floor(width / charLength);
-
-      let actualLength =
-        numCharacters < numCharactersToShow
-          ? numCharacters
-          : numCharactersToShow;
-
-      let textPath = svgEl.select(`#textPath${data.Id}`);
-
-      if (textLength > (diff / 360) * circumference) {
-        textPath.text(data.Title.substr(0, actualLength));
-      }
-    }
-  };
 
   useEffect(() => {
     const svgEl = d3.select(ref.current);
@@ -372,10 +284,13 @@ const DonutWheel = ({
       items.forEach((item, index) => {
         let startDate = new Date(item.StartDate);
         let dueDate = new Date(item.EndDate);
+        let counter = 0;
         if (
           startDate.getFullYear() == currentYear &&
-          dueDate.getFullYear() == currentYear
+          dueDate.getFullYear() == currentYear &&
+          item.StartDate < item.EndDate
         )
+          // if (counter < 2) {
           mappedItems.push({
             Id: item.Id,
             Title: item.Title,
@@ -386,116 +301,41 @@ const DonutWheel = ({
             StartDay: getDayOfYear(startDate),
             EndDay: getDayOfYear(dueDate),
           });
+        // }
       });
 
-      mappedItems.forEach((item) => {
-        if (item.Category) {
-          let wheel = donutWheelData.find((c) => c.category == item.Category);
-          let eventColour;
-          let diff = 0;
-
-          if (wheel.category === 'Generell') {
-            eventColour = circleOneEvCol;
-          } else if (wheel.category === 'Kategori 1') {
-            eventColour = circleTwoEvCol;
-          } else if (wheel.category === 'Kategori 2') {
-            eventColour = circleThreeEvCol;
-          } else if (wheel.category === 'Kategori 3') {
-            eventColour = circleFourEvCol;
-          }
-
-          mappedItems.forEach((listItem) => {
-            if (
-              item.Category == listItem.Category &&
-              item.Title != listItem.Title
-            ) {
-              //item between listitem
-              if (
-                item.StartDay >= listItem.StartDay &&
-                item.EndDay <= listItem.EndDay
-              ) {
-                diff = (wheel.outerRadius - wheel.innerRadius) / 2;
-                item.RenderUpper = true;
-              }
-              //listItem betwen item
-              else if (
-                item.StartDay <= listItem.StartDay &&
-                item.EndDay >= listItem.EndDay
-              ) {
-                diff = (wheel.outerRadius - wheel.innerRadius) / 2;
-                item.RenderUpper = false;
-              }
-              //item starts before, ends after listitem start
-              else if (
-                item.StartDay <= listItem.StartDay &&
-                item.EndDay >= listItem.StartDay
-              ) {
-                diff = (wheel.outerRadius - wheel.innerRadius) / 2;
-                item.RenderUpper = true;
-              }
-              //item ends after, starts during
-              else if (
-                item.StartDay >= listItem.StartDay &&
-                item.StartDay <= listItem.EndDay
-              ) {
-                diff = (wheel.outerRadius - wheel.innerRadius) / 2;
-                item.RenderUpper = false;
-              }
-            }
-          });
-
-          if (item.RenderUpper) {
-            createEventArc(
-              item.StartDay,
-              item.EndDay,
-              eventArcs,
-              wheel.outerRadius,
-              wheel.innerRadius + diff,
-              eventColour,
-              item.Title,
-              item.Id,
-              wheel.startAngle,
-              wheel.endAngle
-            );
-          } else {
-            createEventArc(
-              item.StartDay,
-              item.EndDay,
-              eventArcs,
-              wheel.outerRadius - diff,
-              wheel.innerRadius,
-              eventColour,
-              item.Title,
-              item.Id,
-              wheel.startAngle,
-              wheel.endAngle
-            );
-          }
-        }
-      });
+      onCreateEvent(
+        mappedItems,
+        mappedItems,
+        circleOneEvCol,
+        circleTwoEvCol,
+        circleThreeEvCol,
+        circleFourEvCol,
+        eventArcs
+      );
 
       eventArcs.forEach((event, index) => {
         let data = mappedItems.find((d) => d.Id == event.id);
 
         if (data.StartDay < 90 && data.StartDay > 0) {
-          renderEventText(svgEl, index, event, data, 5, 20);
+          renderEventText(svgEl, library, index, event, data, 5, 20);
         } else if (data.StartDay > 90 && data.StartDay < 180) {
-          renderEventText(svgEl, index, event, data, 5, -10);
+          renderEventText(svgEl, library, index, event, data, 5, -10);
         } else if (data.StartDay > 180 && data.StartDay < 270) {
-          renderEventText(svgEl, index, event, data, 5, -5);
+          renderEventText(svgEl, library, index, event, data, 5, -5);
         } else if (data.StartDay > 270 && data.StartDay < 365) {
-          renderEventText(svgEl, index, event, data, 5, 20);
+          renderEventText(svgEl, library, index, event, data, 5, 20);
         }
 
         svgEl
-          .selectAll(`#arcLabel${library}${data.Id}`)
+          .selectAll(`#arcLabel-${library}-${data.Id}`)
           .style('cursor', 'pointer')
           .on('mouseenter', (e) => {
             setTextValue(data.Title);
             setDateValue(
-              data.StartDate.toLocaleDateString() +
+              data.StartDate.toLocaleDateString('sv-SE') +
                 ' - ' +
-                data.EndDate.toLocaleDateString()
+                data.EndDate.toLocaleDateString('sv-SE')
             );
             setShowDiv(true);
           })
@@ -520,6 +360,10 @@ const DonutWheel = ({
   }, [
     items,
     circlesForDonut,
+    circleOneEvCol,
+    circleTwoEvCol,
+    circleThreeEvCol,
+    circleFourEvCol,
     circelOneTitle,
     circleTwoTitle,
     circleThreeTitle,
@@ -538,10 +382,11 @@ const DonutWheel = ({
   return (
     <>
       <AddEventModal items={items} setItems={setItems} library={library} />
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <div className={styles.yearWheelContainer}>
         {showDiv && <DivHover />}
         {isModalOpen && (
           <EventModal
+            library={library}
             isModalOpen={isModalOpen}
             setIsModalOpen={setIsModalOpen}
             items={items}
