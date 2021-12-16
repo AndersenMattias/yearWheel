@@ -244,7 +244,6 @@ export const EventModal = ({
               onChange={(e, value) => {
                 setUpdatedEvent((prev) => ({ ...prev, title: value }));
               }}
-              maxLength={20}
             />
             <Label className={styles.eventLabel}>Beskrivning</Label>
             <TextField

@@ -345,7 +345,7 @@ export const populateDates = (
       .style('font', `0.9em 'Segoe UI`)
       .style('fill', 'black')
       .attr('font-weight', 400)
-      .attr('letter-spacing', '0.39em')
+      .attr('letter-spacing', '0.41em')
       .attr('dx', 15)
       // .attr('y', yVal)
       .attr('dy', dyVal);

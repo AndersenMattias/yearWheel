@@ -63,27 +63,21 @@ export const AddEventModal = ({
   ];
 
   useEffect(() => {
-    if (input.title.length > 3 || input.description.length > 5) {
+    if (input.title.length > 3) {
       setShowError(false);
       setErrorMessage('');
     }
-  }, [input, input.title, input.description]);
+  }, [input, input.title]);
 
   useEffect(() => {
-    if (
-      input.title ||
-      input.description ||
-      input.startDate ||
-      input.endDate !== ''
-    ) {
+    if (input.title || input.startDate || input.endDate !== '') {
       setShowError(false);
     }
-  }, [input.title, input.description, input.category, input.startDate]);
+  }, [input.title, input.category, input.startDate]);
 
   const onHandleSubmit = async () => {
     if (
       !input.title ||
-      !input.description ||
       !selectedCategory ||
       !input.startDate ||
       !input.endDate
@@ -93,15 +87,11 @@ export const AddEventModal = ({
     } else if (input.title.length < 3) {
       setErrorMessage('Titeln måste vara längre än tre tecken.');
       setShowError(true);
-    } else if (input.description.length < 5) {
-      setErrorMessage('Beskrivningen måste vara längre än fem tecken.');
-      setShowError(true);
     } else if (input.startDate > input.endDate) {
-      setErrorMessage('aja baja.');
+      setErrorMessage('Startdatum är efter slutdatum.');
       setShowError(true);
     } else if (
       input.title &&
-      input.description &&
       selectedCategory &&
       input.startDate &&
       input.endDate
@@ -176,7 +166,7 @@ export const AddEventModal = ({
           setItems((prev) => [...prev, newEvent]);
         } else {
           setShowError(true);
-          setErrorMessage('Ont om plats, aj aj.');
+          setErrorMessage('Eventet får inte plats.');
           return;
         }
 
